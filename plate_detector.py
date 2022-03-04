@@ -70,7 +70,7 @@ def data_uri_to_cv2_img(encoded_data):
 
 
 def get_area(xywh):
-    return (xywh[2] - xywh[0]) * (xywh[3] - xywh[1])
+    return xywh[2] * xywh[3]
 
 
 def crop_image(img0s, primary_bb):
@@ -103,7 +103,8 @@ if __name__ == '__main__':
     with open(sys.argv[1], "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read())
         image = data_uri_to_cv2_img(encoded_string)
-        plate = Detector().detect(image)
+        plate, plate_image = Detector().detect(image)
+        cv2.imwrite('test.png', plate_image)
         s = re.sub(r'\W+', '', plate)
 
         pattern = re.compile("[A-Z]{1,3}[0-9]{2,5}[A-Z]?")

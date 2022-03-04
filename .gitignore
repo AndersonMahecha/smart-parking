@@ -130,3 +130,5 @@ dmypy.json
 /weights/
 /data/
 /.idea/
+data
+runs
