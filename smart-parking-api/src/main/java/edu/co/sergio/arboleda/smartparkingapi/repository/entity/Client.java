@@ -13,7 +13,7 @@ import javax.persistence.OneToOne;
 import org.hibernate.annotations.GenericGenerator;
 
 @Entity
-public class Student {
+public class Client {
 
 	@Id
 	@GeneratedValue(generator = "uuid2")

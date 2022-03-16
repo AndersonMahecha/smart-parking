@@ -2,19 +2,19 @@ package edu.co.sergio.arboleda.smartparkingapi.service;
 
 import java.util.List;
 
-import org.springframework.stereotype.Service;
-
 import edu.co.sergio.arboleda.smartparkingapi.GenericException;
-import edu.co.sergio.arboleda.smartparkingapi.rest.api.StudentApi;
+import edu.co.sergio.arboleda.smartparkingapi.rest.api.ClientApi;
 
 public interface StudentService {
 
-	List<StudentApi> findAll();
+	List<ClientApi> findAll();
 
-	StudentApi create(StudentApi studentApi);
+	ClientApi create(ClientApi clientApi);
 
-	StudentApi searchByDocumentNumber(String documentNumber) throws GenericException;
+	ClientApi findBuDocumentNumberOrLicenseCode(String documentNumber, String licenseCode) throws GenericException;
 
-	StudentApi searchByLicense(String licenseCode) throws GenericException;
+	ClientApi searchByDocumentNumber(String documentNumber) throws GenericException;
+
+	ClientApi searchByLicense(String licenseCode) throws GenericException;
 
 }

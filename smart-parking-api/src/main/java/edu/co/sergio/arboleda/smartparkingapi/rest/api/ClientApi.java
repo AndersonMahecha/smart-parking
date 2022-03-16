@@ -2,13 +2,13 @@ package edu.co.sergio.arboleda.smartparkingapi.rest.api;
 
 import java.util.UUID;
 
-public class StudentApi {
+public class ClientApi {
 
 	private UUID id;
 	private UserApi user;
 	private String licenseCode;
 
-	public StudentApi() {
+	public ClientApi() {
 		super();
 	}
 
