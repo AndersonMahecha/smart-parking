@@ -1,5 +1,7 @@
 package edu.co.sergio.arboleda.smartparkingapi;
 
+import java.time.Clock;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -20,6 +22,11 @@ public class SmartParkingApiApplication {
 	@Bean
 	public ModelMapper modelMapper() {
 		return new ModelMapper();
+	}
+
+	@Bean
+	public Clock clock() {
+		return Clock.systemDefaultZone();
 	}
 
 }

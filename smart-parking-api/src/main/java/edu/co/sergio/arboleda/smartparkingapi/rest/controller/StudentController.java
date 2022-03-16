@@ -13,28 +13,28 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.co.sergio.arboleda.smartparkingapi.GenericException;
 import edu.co.sergio.arboleda.smartparkingapi.rest.api.ClientApi;
-import edu.co.sergio.arboleda.smartparkingapi.service.StudentService;
+import edu.co.sergio.arboleda.smartparkingapi.service.ClientService;
 
 @RestController
 @RequestMapping(path = "/students")
 public class StudentController {
 
-	private final StudentService studentService;
+	private final ClientService clientService;
 
 	@Autowired
-	public StudentController(StudentService studentService) {
-		this.studentService = studentService;
+	public StudentController(ClientService clientService) {
+		this.clientService = clientService;
 	}
 
 	@PostMapping
 	private ResponseEntity<ClientApi> create(@RequestBody ClientApi clientApi) {
-		ClientApi response = studentService.create(clientApi);
+		ClientApi response = clientService.create(clientApi);
 		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping(path = "/")
+	@GetMapping()
 	private ResponseEntity<List<ClientApi>> findAll() {
-		List<ClientApi> response = studentService.findAll();
+		List<ClientApi> response = clientService.findAll();
 		return ResponseEntity.ok(response);
 	}
 
@@ -42,7 +42,7 @@ public class StudentController {
 	private ResponseEntity<ClientApi> findStudent(@RequestParam(name = "licenseCode") String licenseCode,
 												  @RequestParam("documentNumber") String documentNumber)
 			throws GenericException {
-		ClientApi clientApi = studentService.findBuDocumentNumberOrLicenseCode(documentNumber, licenseCode);
+		ClientApi clientApi = clientService.findBuDocumentNumberOrLicenseCode(documentNumber, licenseCode);
 		return ResponseEntity.ok(clientApi);
 	}
 

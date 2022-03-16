@@ -11,19 +11,18 @@ import org.springframework.stereotype.Service;
 import edu.co.sergio.arboleda.smartparkingapi.GenericException;
 import edu.co.sergio.arboleda.smartparkingapi.repository.ClientRepository;
 import edu.co.sergio.arboleda.smartparkingapi.repository.entity.Client;
-
 import edu.co.sergio.arboleda.smartparkingapi.rest.api.ClientApi;
-import edu.co.sergio.arboleda.smartparkingapi.service.StudentService;
+import edu.co.sergio.arboleda.smartparkingapi.service.ClientService;
 
 @Service
-public class StudentServiceImpl implements StudentService {
+public class ClientServiceImpl implements ClientService {
 
 	private final ModelMapper modelMapper;
 	private final ClientRepository clientRepository;
 
 	@Autowired
-	public StudentServiceImpl(ModelMapper modelMapper,
-							  ClientRepository clientRepository) {
+	public ClientServiceImpl(ModelMapper modelMapper,
+							 ClientRepository clientRepository) {
 		this.modelMapper = modelMapper;
 		this.clientRepository = clientRepository;
 	}
@@ -53,19 +52,18 @@ public class StudentServiceImpl implements StudentService {
 		throw new GenericException("Parametros invalidos", "INVALID_PARAMETERS");
 	}
 
-	@Override
-	public ClientApi searchByDocumentNumber(String documentNumber) throws GenericException {
+	private ClientApi searchByDocumentNumber(String documentNumber) throws GenericException {
 		Optional<Client> byUserDocumentNumber = clientRepository.findByUserDocumentNumber(documentNumber);
-		if(byUserDocumentNumber.isPresent()){
+		if (byUserDocumentNumber.isPresent()) {
 			return modelMapper.map(byUserDocumentNumber.get(), ClientApi.class);
 		}
-		throw new GenericException(String.format("El numero de documento : %s no fue encontrado", documentNumber), "DOCUMENT_NUMBER_NOT_FOUND");
+		throw new GenericException(String.format("El numero de documento : %s no fue encontrado", documentNumber),
+				"DOCUMENT_NUMBER_NOT_FOUND");
 	}
 
-	@Override
-	public ClientApi searchByLicense(String licenseCode) throws GenericException {
+	private ClientApi searchByLicense(String licenseCode) throws GenericException {
 		Optional<Client> byLicenseCode = clientRepository.findByLicenseCode(licenseCode);
-		if(byLicenseCode.isPresent()){
+		if (byLicenseCode.isPresent()) {
 			return modelMapper.map(byLicenseCode.get(), ClientApi.class);
 		}
 		throw new GenericException("El carnet no se encuentra registrado", "LICENSE_NOT_FOUND");

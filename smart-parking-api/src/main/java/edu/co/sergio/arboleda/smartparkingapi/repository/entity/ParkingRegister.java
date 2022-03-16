@@ -31,6 +31,12 @@ public class ParkingRegister {
 	private LocalDateTime exit;
 	@Column(name = "total_cost")
 	private BigDecimal totalCost;
+	@Column(name = "payed")
+	private Boolean payed;
+
+	public ParkingRegister() {
+		super();
+	}
 
 	public UUID getId() {
 		return id;
@@ -70,6 +76,68 @@ public class ParkingRegister {
 
 	public void setTotalCost(BigDecimal totalCost) {
 		this.totalCost = totalCost;
+	}
+
+	private ParkingRegister(Builder builder) {
+		client = builder.client;
+		entry = builder.entry;
+		exit = builder.exit;
+		totalCost = builder.totalCost;
+		payed = builder.payed;
+	}
+
+	public static Builder newBuilder() {
+		return new Builder();
+	}
+
+	public Boolean getPayed() {
+		return payed;
+	}
+
+	public void setPayed(Boolean payed) {
+		this.payed = payed;
+	}
+
+	public static final class Builder {
+
+		private Client client;
+		private LocalDateTime entry;
+		private LocalDateTime exit;
+		private BigDecimal totalCost;
+		private Boolean payed;
+
+		private Builder() {
+		}
+
+		public Builder withClient(Client client) {
+			this.client = client;
+			return this;
+		}
+
+		public Builder withEntry(LocalDateTime entry) {
+			this.entry = entry;
+			return this;
+		}
+
+		public Builder withExit(LocalDateTime exit) {
+			this.exit = exit;
+			return this;
+		}
+
+		public Builder withTotalCost(BigDecimal totalCost) {
+			this.totalCost = totalCost;
+			return this;
+		}
+
+		public Builder withPayed(Boolean payed) {
+			this.payed = payed;
+			return this;
+		}
+
+		public ParkingRegister build() {
+			return new ParkingRegister(this);
+		}
+
 	}
 
 }
