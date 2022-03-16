@@ -1,6 +1,6 @@
 package edu.co.sergio.arboleda.smartparkingapi.service;
 
-import edu.co.sergio.arboleda.smartparkingapi.GenericException;
+import edu.co.sergio.arboleda.smartparkingapi.util.exceptions.GenericException;
 
 public interface ParkingService {
 

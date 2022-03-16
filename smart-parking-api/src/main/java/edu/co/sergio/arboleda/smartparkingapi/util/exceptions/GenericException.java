@@ -1,4 +1,4 @@
-package edu.co.sergio.arboleda.smartparkingapi;
+package edu.co.sergio.arboleda.smartparkingapi.util.exceptions;
 
 public class GenericException extends Exception{
 

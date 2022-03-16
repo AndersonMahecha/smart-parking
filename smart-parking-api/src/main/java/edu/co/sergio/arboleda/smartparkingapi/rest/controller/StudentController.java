@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import edu.co.sergio.arboleda.smartparkingapi.GenericException;
 import edu.co.sergio.arboleda.smartparkingapi.rest.api.ClientApi;
 import edu.co.sergio.arboleda.smartparkingapi.service.ClientService;
+import edu.co.sergio.arboleda.smartparkingapi.util.exceptions.GenericException;
 
 @RestController
 @RequestMapping(path = "/students")

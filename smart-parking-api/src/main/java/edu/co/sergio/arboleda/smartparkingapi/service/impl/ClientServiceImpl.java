@@ -8,11 +8,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import edu.co.sergio.arboleda.smartparkingapi.GenericException;
 import edu.co.sergio.arboleda.smartparkingapi.repository.ClientRepository;
 import edu.co.sergio.arboleda.smartparkingapi.repository.entity.Client;
 import edu.co.sergio.arboleda.smartparkingapi.rest.api.ClientApi;
 import edu.co.sergio.arboleda.smartparkingapi.service.ClientService;
+import edu.co.sergio.arboleda.smartparkingapi.util.exceptions.GenericException;
 
 @Service
 public class ClientServiceImpl implements ClientService {

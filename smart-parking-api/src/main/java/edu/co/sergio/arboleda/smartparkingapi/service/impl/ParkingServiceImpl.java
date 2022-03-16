@@ -7,12 +7,12 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import edu.co.sergio.arboleda.smartparkingapi.GenericException;
 import edu.co.sergio.arboleda.smartparkingapi.repository.ClientRepository;
 import edu.co.sergio.arboleda.smartparkingapi.repository.ParkingRegisterRepository;
 import edu.co.sergio.arboleda.smartparkingapi.repository.entity.Client;
 import edu.co.sergio.arboleda.smartparkingapi.repository.entity.ParkingRegister;
 import edu.co.sergio.arboleda.smartparkingapi.service.ParkingService;
+import edu.co.sergio.arboleda.smartparkingapi.util.exceptions.GenericException;
 
 @Service
 public class ParkingServiceImpl implements ParkingService {
