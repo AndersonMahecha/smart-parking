@@ -1,6 +1,6 @@
 <template>
-  <h1 class="title">Registro de usuario</h1>
   <div class="container has-text-left">
+    <h1 class="title">Registro de usuario</h1>
     <div class="columns">
       <div class="column is-four-fifths">
         <div class="field">

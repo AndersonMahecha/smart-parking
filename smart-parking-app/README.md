@@ -1,4 +1,4 @@
-# smart-web-app
+# smart-parking-app
 
 ## Project setup
 ```

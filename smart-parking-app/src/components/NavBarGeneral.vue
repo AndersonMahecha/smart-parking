@@ -6,6 +6,7 @@
           src="https://www.usergioarboleda.edu.co/wp-content/uploads/2015/03/USergioArboleda-LogoHead.png"
         />
       </a>
+
       <a
         role="button"
         class="navbar-burger"
@@ -51,8 +52,6 @@
     </div>
   </nav>
 </template>
-
-
 
 <script>
 export default {};
