@@ -17,12 +17,12 @@ import edu.co.sergio.arboleda.smartparkingapi.util.exceptions.GenericException;
 
 @RestController
 @RequestMapping(path = "/students")
-public class StudentController {
+public class ClientController {
 
 	private final ClientService clientService;
 
 	@Autowired
-	public StudentController(ClientService clientService) {
+	public ClientController(ClientService clientService) {
 		this.clientService = clientService;
 	}
 

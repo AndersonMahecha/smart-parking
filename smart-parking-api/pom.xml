@@ -8,10 +8,10 @@
         <version>2.6.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>crud-basic</groupId>
-    <artifactId>test</artifactId>
+    <groupId>smart-parking-api</groupId>
+    <artifactId>smart-parking</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>test</name>
+    <name>api</name>
     <description>Demo project for Spring Boot</description>
     <properties>
         <java.version>11</java.version>

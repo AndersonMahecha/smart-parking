@@ -30,7 +30,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public void registerEntry(String licenseCode) throws GenericException {
+	public void registerEntry(String licenseCode, String vehicleType) throws GenericException {
 		Client client = getClient(licenseCode);
 
 		Optional<ParkingRegister> byClientAndExitIsNull = parkingRegisterRepository.findByClientAndExitIsNull(client);

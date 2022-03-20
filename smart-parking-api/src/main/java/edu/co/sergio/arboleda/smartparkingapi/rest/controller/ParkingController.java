@@ -22,8 +22,9 @@ public class ParkingController {
 	}
 
 	@PostMapping(path = "/entry")
-	ResponseEntity<Void> registerEntry(@RequestParam("licenseCode") String licenseCode) throws GenericException {
-		parkingService.registerEntry(licenseCode);
+	ResponseEntity<Void> registerEntry(@RequestParam("licenseCode") String licenseCode,
+									   @RequestParam("vehicleType") String vehicleType) throws GenericException {
+		parkingService.registerEntry(licenseCode, vehicleType);
 		return ResponseEntity.ok().build();
 	}
 
