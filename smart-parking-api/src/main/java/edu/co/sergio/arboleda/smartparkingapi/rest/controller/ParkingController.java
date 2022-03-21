@@ -2,6 +2,7 @@ package edu.co.sergio.arboleda.smartparkingapi.rest.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,6 +12,7 @@ import edu.co.sergio.arboleda.smartparkingapi.service.ParkingService;
 import edu.co.sergio.arboleda.smartparkingapi.util.exceptions.GenericException;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping(path = "/parking")
 public class ParkingController {
 
