@@ -5,8 +5,8 @@
 
     <div class="columns">
       <div class="column is-four-fifths">
-        <div class="field">
-          <label class="label">Carnet</label>
+        <label class="label">Carnet</label>
+        <div class="field has-addons">
           <div class="control">
             <input
               type="text"
@@ -16,6 +16,12 @@
               disabled
             />
           </div>
+          <a
+            class="button"
+            :class="port ? 'is-success' : 'is-danger'"
+            @click="reading = true"
+            >Leer</a
+          >
         </div>
       </div>
     </div>
@@ -25,12 +31,15 @@
 <script>
 import UserView from "../views/UserView.vue";
 import UsersApi from "@/UsersApi";
+import { readTagId } from "@/SerialScanner";
 export default {
   components: { UserView },
+  props: ["port"],
   data() {
     return {
+      reading: false,
       client: {
-        licenseCode: this.uuidv4(),
+        licenseCode: "",
         user: {},
       },
     };
@@ -45,14 +54,19 @@ export default {
         this.$router.replace({ name: "Users" });
       });
     },
-
-    uuidv4() {
-      return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
-        (
-          c ^
-          (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
-        ).toString(16)
-      );
+  },
+  watch: {
+    reading() {
+      (async () => {
+        if (this.reading) {
+          if (!this.port) {
+            return;
+          }
+          this.client.licenseCode = "";
+          this.client.licenseCode = await readTagId(this.port);
+          this.reading = false;
+        }
+      })();
     },
   },
 };

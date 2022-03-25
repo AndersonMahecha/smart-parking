@@ -7,9 +7,7 @@ function createUser(user) {
     headers: {
       "Content-Type": "application/json",
     },
-  })
-    .then((res) => res.json())
-    .then((res) => res.data);
+  }).then((res) => res.json());
 }
 
 function getUsers() {
@@ -18,4 +16,14 @@ function getUsers() {
   }).then((res) => res.json());
 }
 
-export default { getUsers, createUser };
+function getUser(licenseCode = null, documentNumber = null) {
+  return fetch(`${url}/find`, {
+    method: "GET",
+    params: {
+      licenseCode: licenseCode,
+      documentNumber: documentNumber,
+    },
+  }).then((res) => res.json());
+}
+
+export default { getUser, getUsers, createUser };

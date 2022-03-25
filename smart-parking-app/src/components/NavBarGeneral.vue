@@ -33,6 +33,9 @@
       <div class="navbar-end">
         <div class="navbar-item">
           <div class="buttons">
+            <a class="button" @click="connect">{{
+              port ? "Desconectar" : "Conectar"
+            }}</a>
             <a class="button is-primary">
               <strong>Sign up</strong>
             </a>
@@ -45,7 +48,26 @@
 </template>
 
 <script>
-export default {};
+export default {
+  data() {
+    return {
+      port: null,
+    };
+  },
+  methods: {
+    async connect() {
+      if (!this.port) {
+        this.port = await navigator.serial.requestPort();
+        this.port
+          .open({ baudRate: 9600 })
+          .then(() => this.$emit("connected", this.port));
+      } else {
+        this.port.close();
+        this.port = null;
+      }
+    },
+  },
+};
 </script>
 
 <style lang="scss">
