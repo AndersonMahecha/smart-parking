@@ -3,6 +3,7 @@ import HomeGeneral from "@/components/HomeGeneral";
 import UsersComponent from "@/components/UsersComponent";
 import UserRegister from "@/components/UserRegister";
 import EntryRegister from "@/components/EntryRegister";
+import PaymentComponent from "@/components/PaymentComponent";
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: "/vehicle/entry",
     name: "Entry-Vehicle",
     component: EntryRegister,
+  },
+  {
+    path: "/payment",
+    name: "Payment",
+    component: PaymentComponent,
   },
 ];
 

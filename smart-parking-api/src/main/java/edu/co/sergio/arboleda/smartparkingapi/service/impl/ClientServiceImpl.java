@@ -1,13 +1,13 @@
 package edu.co.sergio.arboleda.smartparkingapi.service.impl;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import edu.co.sergio.arboleda.smartparkingapi.delegate.ClientDelegate;
 import edu.co.sergio.arboleda.smartparkingapi.repository.ClientRepository;
 import edu.co.sergio.arboleda.smartparkingapi.repository.entity.Client;
 import edu.co.sergio.arboleda.smartparkingapi.rest.api.ClientApi;
@@ -19,12 +19,15 @@ public class ClientServiceImpl implements ClientService {
 
 	private final ModelMapper modelMapper;
 	private final ClientRepository clientRepository;
+	private final ClientDelegate clientDelegate;
 
 	@Autowired
 	public ClientServiceImpl(ModelMapper modelMapper,
-							 ClientRepository clientRepository) {
+							 ClientRepository clientRepository,
+							 ClientDelegate clientDelegate) {
 		this.modelMapper = modelMapper;
 		this.clientRepository = clientRepository;
+		this.clientDelegate = clientDelegate;
 	}
 
 	@Override
@@ -37,6 +40,7 @@ public class ClientServiceImpl implements ClientService {
 
 	@Override
 	public ClientApi create(ClientApi clientApi) {
+		clientApi.setLicenseCode(clientApi.getLicenseCode().trim());
 		Client client = modelMapper.map(clientApi, Client.class);
 		return modelMapper.map(clientRepository.save(client), ClientApi.class);
 	}
@@ -45,28 +49,11 @@ public class ClientServiceImpl implements ClientService {
 	public ClientApi findBuDocumentNumberOrLicenseCode(String documentNumber, String licenseCode)
 			throws GenericException {
 		if (documentNumber != null) {
-			return searchByDocumentNumber(documentNumber);
+			return modelMapper.map(clientDelegate.findClientByDocument(documentNumber), ClientApi.class);
 		}else if (licenseCode != null){
-			return searchByLicense(licenseCode);
+			return modelMapper.map(clientDelegate.findClientByLicenseCode(licenseCode), ClientApi.class);
 		}
 		throw new GenericException("Parametros invalidos", "INVALID_PARAMETERS");
-	}
-
-	private ClientApi searchByDocumentNumber(String documentNumber) throws GenericException {
-		Optional<Client> byUserDocumentNumber = clientRepository.findByUserDocumentNumber(documentNumber);
-		if (byUserDocumentNumber.isPresent()) {
-			return modelMapper.map(byUserDocumentNumber.get(), ClientApi.class);
-		}
-		throw new GenericException(String.format("El numero de documento : %s no fue encontrado", documentNumber),
-				"DOCUMENT_NUMBER_NOT_FOUND");
-	}
-
-	private ClientApi searchByLicense(String licenseCode) throws GenericException {
-		Optional<Client> byLicenseCode = clientRepository.findByLicenseCode(licenseCode);
-		if (byLicenseCode.isPresent()) {
-			return modelMapper.map(byLicenseCode.get(), ClientApi.class);
-		}
-		throw new GenericException("El carnet no se encuentra registrado", "LICENSE_NOT_FOUND");
 	}
 
 }

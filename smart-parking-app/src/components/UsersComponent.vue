@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import usersApi from "@/UsersApi";
+import usersApi from "@/api/UsersApi";
 export default {
   data() {
     return {

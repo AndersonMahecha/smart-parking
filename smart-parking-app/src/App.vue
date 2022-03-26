@@ -1,7 +1,7 @@
 <template>
   <div>
     <nav-bar-general @connected="saveConnection" />
-    <router-view v-bind:port="port" />
+    <router-view :port="port" />
   </div>
 </template>
 
@@ -12,6 +12,7 @@ export default {
   data() {
     return {
       port: null,
+      routerId: true,
     };
   },
   components: { NavBarGeneral },
@@ -20,6 +21,7 @@ export default {
       this.port = port;
     },
   },
+  watch: {},
 };
 </script>
 

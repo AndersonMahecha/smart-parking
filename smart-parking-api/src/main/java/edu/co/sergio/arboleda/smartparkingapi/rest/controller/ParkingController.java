@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import edu.co.sergio.arboleda.smartparkingapi.rest.api.ParkingRegisterApi;
 import edu.co.sergio.arboleda.smartparkingapi.service.ParkingService;
 import edu.co.sergio.arboleda.smartparkingapi.util.exceptions.GenericException;
 
@@ -24,16 +25,16 @@ public class ParkingController {
 	}
 
 	@PostMapping(path = "/entry")
-	ResponseEntity<Void> registerEntry(@RequestParam("licenseCode") String licenseCode,
+	ResponseEntity<ParkingRegisterApi> registerEntry(@RequestParam("licenseCode") String licenseCode,
 									   @RequestParam("vehicleType") String vehicleType) throws GenericException {
-		parkingService.registerEntry(licenseCode, vehicleType);
-		return ResponseEntity.ok().build();
+		ParkingRegisterApi parkingRegisterApi = parkingService.registerEntry(licenseCode, vehicleType);
+		return ResponseEntity.ok(parkingRegisterApi);
 	}
 
 	@PostMapping(path = "/exit")
-	ResponseEntity<Void> registerExit(@RequestParam("licenseCode") String licenseCode) throws GenericException {
-		parkingService.registerExit(licenseCode);
-		return ResponseEntity.ok().build();
+	ResponseEntity<ParkingRegisterApi> registerExit(@RequestParam("licenseCode") String licenseCode) throws GenericException {
+		ParkingRegisterApi parkingRegisterApi = parkingService.registerExit(licenseCode);
+		return ResponseEntity.ok(parkingRegisterApi);
 	}
 
 }

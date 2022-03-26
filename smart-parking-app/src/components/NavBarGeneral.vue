@@ -28,14 +28,20 @@
         <router-link :to="{ name: 'Users' }" class="navbar-item"
           >Usuarios</router-link
         >
+
+        <router-link :to="{ name: 'Payment' }" class="navbar-item"
+          >Pagos</router-link
+        >
       </div>
 
       <div class="navbar-end">
         <div class="navbar-item">
           <div class="buttons">
-            <a class="button" @click="connect">{{
-              port ? "Desconectar" : "Conectar"
-            }}</a>
+            <button class="button" @click="connect">
+              <span class="icon"> <i class="fa-brands fa-usb"></i></span
+              ><span>{{ port ? "Desconectar" : "Conectar" }}</span>
+            </button>
+
             <a class="button is-primary">
               <strong>Sign up</strong>
             </a>

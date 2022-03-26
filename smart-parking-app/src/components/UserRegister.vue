@@ -10,18 +10,21 @@
           <div class="control">
             <input
               type="text"
-              class="input is-primary"
+              class="input is-primary is-fullwidth"
               placeholder="ID carnet"
               v-model="client.licenseCode"
               disabled
             />
           </div>
-          <a
-            class="button"
-            :class="port ? 'is-success' : 'is-danger'"
+          <button
+            class="button has-tooltip-multiline"
+            :class="port ? 'is-success ' : 'is-danger'"
             @click="reading = true"
-            >Leer</a
+            data-tooltip="Recuerda primero validar que el lector este conectado"
           >
+            <span class="icon"> <i class="fa-solid fa-id-card"></i></span>
+            <span>Leer</span>
+          </button>
         </div>
       </div>
     </div>
@@ -30,7 +33,7 @@
 </template>
 <script>
 import UserView from "../views/UserView.vue";
-import UsersApi from "@/UsersApi";
+import UsersApi from "@/api/UsersApi";
 import { readTagId } from "@/SerialScanner";
 export default {
   components: { UserView },

@@ -13,7 +13,7 @@ async function readTagId(port) {
 
       serial += decoder.decode(value);
       if (serial.length >= 8) {
-        return serial;
+        return String(serial);
       }
     }
   } catch (error) {

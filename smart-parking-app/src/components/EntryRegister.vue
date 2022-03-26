@@ -41,7 +41,10 @@
 </template>
 
 <script>
+import { registerEntry } from "@/api/EntryApi";
+import { readTagId } from "@/SerialScanner";
 export default {
+  props: ["port"],
   data() {
     return {
       placa: "",
@@ -49,33 +52,27 @@ export default {
       time: "",
     };
   },
-  watch: {
-    placa() {
-      this.getCurrentDateTime();
-    },
-    user() {
-      this.getCurrentDateTime();
+  watch: {},
+  methods: {
+    readData() {
+      this.user = "";
+      this.time = "";
+      this.placa + "";
+      readTagId(this.port)
+        .then((tagId) =>
+          registerEntry(tagId).then((response) => {
+            const user = response.client.user;
+            this.user = user.firstName + " " + user.middleName;
+            this.time = response.entry;
+          })
+        )
+        .finally(() => {
+          window.setTimeout(this.readData, 5000);
+        });
     },
   },
-  methods: {
-    currentDateTime() {
-      const current = new Date();
-      const date =
-        current.getFullYear() +
-        "/" +
-        (current.getMonth() + 1) +
-        "/" +
-        current.getDate();
-      const time =
-        current.getHours() +
-        ":" +
-        current.getMinutes() +
-        ":" +
-        current.getSeconds();
-      const dateTime = date + " " + time;
-
-      this.time = dateTime;
-    },
+  mounted() {
+    this.readData();
   },
 };
 </script>
