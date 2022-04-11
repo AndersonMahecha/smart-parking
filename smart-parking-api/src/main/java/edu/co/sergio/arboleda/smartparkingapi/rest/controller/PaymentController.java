@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.co.sergio.arboleda.smartparkingapi.rest.response.PaymentInfoResponse;
 import edu.co.sergio.arboleda.smartparkingapi.service.PaymentService;
+import edu.co.sergio.arboleda.smartparkingapi.util.exceptions.GenericException;
 
 @RestController
 @RequestMapping(path = "/payments")
@@ -30,9 +31,10 @@ public class PaymentController {
 		return ResponseEntity.ok().build();
 	}
 
-	@GetMapping(path = "/amount")
-	public ResponseEntity<PaymentInfoResponse> getPaymentInfo(@PathVariable String licenseCode){
-		paymentService.getPaymentInfo(licenseCode);
-		return ResponseEntity.ok().build();
+	@GetMapping(path = "/amount/{licenseCode}")
+	public ResponseEntity<PaymentInfoResponse> getPaymentInfo(@PathVariable(name = "licenseCode") String licenseCode)
+			throws GenericException {
+		PaymentInfoResponse paymentInfo = paymentService.getPaymentInfo(licenseCode);
+		return ResponseEntity.ok(paymentInfo);
 	}
 }

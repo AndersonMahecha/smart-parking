@@ -44,7 +44,7 @@ public class ClientController {
 	private ResponseEntity<ClientApi> findStudent(@RequestParam(name = "licenseCode") String licenseCode,
 												  @RequestParam("documentNumber") String documentNumber)
 			throws GenericException {
-		ClientApi clientApi = clientService.findBuDocumentNumberOrLicenseCode(documentNumber, licenseCode);
+		ClientApi clientApi = clientService.findByDocumentNumberOrLicenseCode(documentNumber, licenseCode);
 		return ResponseEntity.ok(clientApi);
 	}
 

@@ -11,6 +11,6 @@ public interface ClientService {
 
 	ClientApi create(ClientApi clientApi);
 
-	ClientApi findBuDocumentNumberOrLicenseCode(String documentNumber, String licenseCode) throws GenericException;
+	ClientApi findByDocumentNumberOrLicenseCode(String documentNumber, String licenseCode) throws GenericException;
 
 }

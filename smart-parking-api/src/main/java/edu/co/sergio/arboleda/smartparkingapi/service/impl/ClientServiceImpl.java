@@ -46,7 +46,7 @@ public class ClientServiceImpl implements ClientService {
 	}
 
 	@Override
-	public ClientApi findBuDocumentNumberOrLicenseCode(String documentNumber, String licenseCode)
+	public ClientApi findByDocumentNumberOrLicenseCode(String documentNumber, String licenseCode)
 			throws GenericException {
 		if (documentNumber != null) {
 			return modelMapper.map(clientDelegate.findClientByDocument(documentNumber), ClientApi.class);
