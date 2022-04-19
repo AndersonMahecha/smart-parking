@@ -12,6 +12,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import edu.co.sergio.arboleda.smartparkingapi.config.security.JwtTokenUtil;
@@ -19,9 +20,9 @@ import edu.co.sergio.arboleda.smartparkingapi.config.security.JwtUserDetailsServ
 import edu.co.sergio.arboleda.smartparkingapi.delegate.UserDelegate;
 import edu.co.sergio.arboleda.smartparkingapi.enums.UserType;
 import edu.co.sergio.arboleda.smartparkingapi.repository.ClientRepository;
+import edu.co.sergio.arboleda.smartparkingapi.repository.UserRepository;
 import edu.co.sergio.arboleda.smartparkingapi.repository.entity.Client;
 import edu.co.sergio.arboleda.smartparkingapi.repository.entity.User;
-import edu.co.sergio.arboleda.smartparkingapi.repository.entity.UserRepository;
 import edu.co.sergio.arboleda.smartparkingapi.rest.api.UserApi;
 import edu.co.sergio.arboleda.smartparkingapi.rest.request.LoginRequest;
 import edu.co.sergio.arboleda.smartparkingapi.rest.response.LoginResponse;
@@ -36,19 +37,23 @@ public class UserDelegateImpl implements UserDelegate {
 	private final JwtTokenUtil jwtTokenUtil;
 	private final JwtUserDetailsService userDetailsService;
 	private final ModelMapper modelMapper;
+	private final PasswordEncoder passwordEncoder;
 
 	@Autowired
 	public UserDelegateImpl(UserRepository userRepository,
 							ClientRepository clientRepository,
 							AuthenticationManager authenticationManager,
 							JwtTokenUtil jwtTokenUtil,
-							JwtUserDetailsService userDetailsService, ModelMapper modelMapper) {
+							JwtUserDetailsService userDetailsService,
+							ModelMapper modelMapper,
+							PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
 		this.clientRepository = clientRepository;
 		this.authenticationManager = authenticationManager;
 		this.jwtTokenUtil = jwtTokenUtil;
 		this.userDetailsService = userDetailsService;
 		this.modelMapper = modelMapper;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	@Override
@@ -57,6 +62,7 @@ public class UserDelegateImpl implements UserDelegate {
 		if (exist.isPresent()) {
 			throw new GenericException("El usuario ya existe", "USERNAME_ALREADY_EXISTS");
 		}
+		userApi.setPassword(passwordEncoder.encode(userApi.getPassword()));
 		User user = modelMapper.map(userApi, User.class);
 		userRepository.save(user);
 	}
@@ -66,7 +72,7 @@ public class UserDelegateImpl implements UserDelegate {
 	public void create(Client client) {
 		User user = User.newBuilder()
 				.withUsername(client.getEmail())
-				.withPassword(client.getDocumentNumber())
+				.withPassword(passwordEncoder.encode(client.getDocumentNumber()))
 				.withEnabled(Boolean.TRUE)
 				.withUserType(UserType.CLIENT.getCode())
 				.build();
@@ -81,7 +87,10 @@ public class UserDelegateImpl implements UserDelegate {
 		UserDetails userDetails = userDetailsService
 				.loadUserByUsername(loginRequest.getUsername());
 		String token = jwtTokenUtil.generateToken(userDetails);
-		return new LoginResponse(token);
+		User user = userRepository.findUserByUsername(loginRequest.getUsername()).orElse(null);
+		assert user != null;
+		user.setPassword(null);
+		return new LoginResponse(token, modelMapper.map(user, UserApi.class));
 	}
 
 	private void authenticate(String username, String password) throws GenericException {

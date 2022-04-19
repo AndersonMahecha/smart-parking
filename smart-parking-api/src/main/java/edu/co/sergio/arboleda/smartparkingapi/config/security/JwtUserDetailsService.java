@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import edu.co.sergio.arboleda.smartparkingapi.repository.entity.UserRepository;
+import edu.co.sergio.arboleda.smartparkingapi.repository.UserRepository;
 
 @Service
 public class JwtUserDetailsService implements UserDetailsService {

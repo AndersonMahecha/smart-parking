@@ -22,7 +22,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	private static final String[] UNSECURED_PATHS = {
 			"/v3/api-docs/**",
-			"/swagger-ui/**"
+			"/swagger-ui/**",
+			"/user/authenticate"
 	};
 
 	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
