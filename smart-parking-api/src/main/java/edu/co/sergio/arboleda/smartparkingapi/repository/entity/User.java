@@ -17,20 +17,29 @@ public class User {
 	@GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
 	@Column(name = "id", columnDefinition = "VARCHAR(255)")
 	private UUID id;
-	@Column(name = "first_name")
-	private String firstName;
-	@Column(name = "middle_name")
-	private String middleName;
-	@Column(name = "last_name")
-	private String lastName;
-	@Column(name = "document_type")
-	private String documentType;
-	@Column(name = "document_number")
-	private String documentNumber;
-	@Column(name = "mobile_number")
-	private String mobileNumber;
-	@Column(name = "email")
-	private String email;
+	@Column(name = "username", nullable = false)
+	private String username;
+	@Column(name = "password", nullable = false)
+	private String password;
+	@Column(name = "is_enabled")
+	private Boolean enabled;
+	@Column(name = "user_type")
+	private Integer userType;
+
+	public User() {
+		super();
+	}
+
+	private User(Builder builder) {
+		setUsername(builder.username);
+		setPassword(builder.password);
+		setEnabled(builder.enabled);
+		setUserType(builder.userType);
+	}
+
+	public static Builder newBuilder() {
+		return new Builder();
+	}
 
 	public UUID getId() {
 		return id;
@@ -40,61 +49,72 @@ public class User {
 		this.id = id;
 	}
 
-	public String getFirstName() {
-		return firstName;
+	public String getUsername() {
+		return username;
 	}
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
-	public String getMiddleName() {
-		return middleName;
+	public String getPassword() {
+		return password;
 	}
 
-	public void setMiddleName(String middleName) {
-		this.middleName = middleName;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
-	public String getLastName() {
-		return lastName;
+	public Boolean getEnabled() {
+		return enabled;
 	}
 
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
+	public void setEnabled(Boolean enabled) {
+		this.enabled = enabled;
 	}
 
-	public String getDocumentType() {
-		return documentType;
+	public Integer getUserType() {
+		return userType;
 	}
 
-	public void setDocumentType(String documentType) {
-		this.documentType = documentType;
+	public void setUserType(Integer userType) {
+		this.userType = userType;
 	}
 
-	public String getDocumentNumber() {
-		return documentNumber;
-	}
+	public static final class Builder {
 
-	public void setDocumentNumber(String documentNumber) {
-		this.documentNumber = documentNumber;
-	}
+		private String username;
+		private String password;
+		private Boolean enabled;
+		private Integer userType;
 
-	public String getMobileNumber() {
-		return mobileNumber;
-	}
+		private Builder() {
+		}
 
-	public void setMobileNumber(String mobileNumber) {
-		this.mobileNumber = mobileNumber;
-	}
+		public Builder withUsername(String username) {
+			this.username = username;
+			return this;
+		}
 
-	public String getEmail() {
-		return email;
-	}
+		public Builder withPassword(String password) {
+			this.password = password;
+			return this;
+		}
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+		public Builder withEnabled(Boolean enabled) {
+			this.enabled = enabled;
+			return this;
+		}
 
+		public Builder withUserType(Integer userType) {
+			this.userType = userType;
+			return this;
+		}
+
+		public User build() {
+			return new User(this);
+		}
+
+	}
 
 }

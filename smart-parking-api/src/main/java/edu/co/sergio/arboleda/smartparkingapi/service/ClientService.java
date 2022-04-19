@@ -9,7 +9,7 @@ public interface ClientService {
 
 	List<ClientApi> findAll();
 
-	ClientApi create(ClientApi clientApi);
+	ClientApi create(ClientApi clientApi) throws GenericException;
 
 	ClientApi findByDocumentNumberOrLicenseCode(String documentNumber, String licenseCode) throws GenericException;
 

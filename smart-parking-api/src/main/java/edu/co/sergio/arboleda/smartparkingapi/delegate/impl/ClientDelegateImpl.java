@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import edu.co.sergio.arboleda.smartparkingapi.delegate.ClientDelegate;
 import edu.co.sergio.arboleda.smartparkingapi.repository.ClientRepository;
 import edu.co.sergio.arboleda.smartparkingapi.repository.entity.Client;
-import edu.co.sergio.arboleda.smartparkingapi.rest.api.ClientApi;
 import edu.co.sergio.arboleda.smartparkingapi.util.exceptions.GenericException;
 
 @Component
@@ -23,7 +22,7 @@ public class ClientDelegateImpl implements ClientDelegate {
 
 	@Override
 	public Client findClientByDocument(String documentNumber) throws GenericException {
-		Optional<Client> byUserDocumentNumber = clientRepository.findByUserDocumentNumber(documentNumber);
+		Optional<Client> byUserDocumentNumber = clientRepository.findByDocumentNumber(documentNumber);
 		if (byUserDocumentNumber.isPresent()) {
 			return byUserDocumentNumber.get();
 		}

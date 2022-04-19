@@ -1,0 +1,20 @@
+version: "3.7"
+services:
+  db:
+    container_name: "db"
+    environment:
+      MYSQL_ROOT_PASSWORD: "password"
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: "smart-parking"
+    image: "mysql/mysql-server:5.7.25"
+    networks:
+      - default
+    ports:
+      - "3306:3306"
+    volumes:
+      - "datos:/var/lib/mysql"
+      - "./db/schema.sql:/docker-entrypoint-initdb.d/1.sql"
+      - "./db/data.sql:/docker-entrypoint-initdb.d/2.sql"
+volumes:
+  datos:
+    name: "datos"

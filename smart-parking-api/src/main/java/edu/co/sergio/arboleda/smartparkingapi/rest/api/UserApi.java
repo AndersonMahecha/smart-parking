@@ -2,16 +2,20 @@ package edu.co.sergio.arboleda.smartparkingapi.rest.api;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class UserApi {
 
+	@JsonProperty
 	private UUID id;
-	private String firstName;
-	private String middleName;
-	private String lastName;
-	private String documentType;
-	private String documentNumber;
-	private String mobileNumber;
-	private String email;
+	@JsonProperty
+	private String username;
+	@JsonProperty
+	private String password;
+	@JsonProperty
+	private Boolean enabled;
+	@JsonProperty
+	private Integer userType;
 
 	public UserApi() {
 		super();
@@ -25,60 +29,36 @@ public class UserApi {
 		this.id = id;
 	}
 
-	public String getFirstName() {
-		return firstName;
+	public String getUsername() {
+		return username;
 	}
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
-	public String getMiddleName() {
-		return middleName;
+	public String getPassword() {
+		return password;
 	}
 
-	public void setMiddleName(String middleName) {
-		this.middleName = middleName;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
-	public String getLastName() {
-		return lastName;
+	public Boolean getEnabled() {
+		return enabled;
 	}
 
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
+	public void setEnabled(Boolean enabled) {
+		this.enabled = enabled;
 	}
 
-	public String getDocumentType() {
-		return documentType;
+	public Integer getUserType() {
+		return userType;
 	}
 
-	public void setDocumentType(String documentType) {
-		this.documentType = documentType;
-	}
-
-	public String getDocumentNumber() {
-		return documentNumber;
-	}
-
-	public void setDocumentNumber(String documentNumber) {
-		this.documentNumber = documentNumber;
-	}
-
-	public String getMobileNumber() {
-		return mobileNumber;
-	}
-
-	public void setMobileNumber(String mobileNumber) {
-		this.mobileNumber = mobileNumber;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
+	public void setUserType(Integer userType) {
+		this.userType = userType;
 	}
 
 }

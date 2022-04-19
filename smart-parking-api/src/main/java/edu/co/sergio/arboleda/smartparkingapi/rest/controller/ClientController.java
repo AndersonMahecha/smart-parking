@@ -17,7 +17,7 @@ import edu.co.sergio.arboleda.smartparkingapi.service.ClientService;
 import edu.co.sergio.arboleda.smartparkingapi.util.exceptions.GenericException;
 
 @RestController
-@RequestMapping(path = "/users")
+@RequestMapping(path = "/clients")
 @CrossOrigin(origins = "*")
 public class ClientController {
 
@@ -29,7 +29,7 @@ public class ClientController {
 	}
 
 	@PostMapping
-	private ResponseEntity<ClientApi> create(@RequestBody ClientApi clientApi) {
+	private ResponseEntity<ClientApi> create(@RequestBody ClientApi clientApi) throws GenericException {
 		ClientApi response = clientService.create(clientApi);
 		return ResponseEntity.ok(response);
 	}
