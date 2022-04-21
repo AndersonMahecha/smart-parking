@@ -26,9 +26,9 @@ public class PaymentController {
 	}
 
 	@PostMapping(path = "/pay/{licenseCode}")
-	public ResponseEntity<Void> payParking(@PathVariable String licenseCode){
-		paymentService.pay(licenseCode);
-		return ResponseEntity.ok().build();
+	public ResponseEntity<PaymentInfoResponse> payParking(@PathVariable String licenseCode) throws GenericException {
+		PaymentInfoResponse response = paymentService.pay(licenseCode);
+		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping(path = "/amount/{licenseCode}")
@@ -37,4 +37,5 @@ public class PaymentController {
 		PaymentInfoResponse paymentInfo = paymentService.getPaymentInfo(licenseCode);
 		return ResponseEntity.ok(paymentInfo);
 	}
+
 }

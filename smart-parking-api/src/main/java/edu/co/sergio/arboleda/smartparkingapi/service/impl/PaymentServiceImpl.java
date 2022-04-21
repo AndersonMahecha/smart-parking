@@ -45,12 +45,17 @@ public class PaymentServiceImpl implements PaymentService {
 	}
 
 	@Override
-	public void pay(String licenseCode) {
-
+	public PaymentInfoResponse pay(String licenseCode) throws GenericException {
+		return getPaymentInfoResponse(licenseCode, true);
 	}
 
 	@Override
 	public PaymentInfoResponse getPaymentInfo(String licenseCode) throws GenericException {
+		return getPaymentInfoResponse(licenseCode, false);
+	}
+
+	private PaymentInfoResponse getPaymentInfoResponse(String licenseCode, boolean makePayment)
+			throws GenericException {
 		Client client = clientDelegate.findClientByLicenseCode(licenseCode);
 		ParkingRegister parkingRegister = parkingRegisterRepository.findByClientAndExitIsNull(client).orElseThrow(
 				() -> new GenericException("Registros sin pagar no encontrados", "NOT_PAYMENT_REQUIRED_FOUND"));
@@ -59,6 +64,11 @@ public class PaymentServiceImpl implements PaymentService {
 		long totalMinutes = entryDateTime.until(currentTime, ChronoUnit.MINUTES);
 		double totalUnits = Math.ceil(totalMinutes / paymentPeriodsInMinutes);
 		BigDecimal totalPrice = new BigDecimal(totalUnits * pricePerPeriod);
+		if (makePayment) {
+			parkingRegister.setPayed(Boolean.TRUE);
+			parkingRegister.setTotalCost(totalPrice);
+			parkingRegisterRepository.save(parkingRegister);
+		}
 		return PaymentInfoResponse.newBuilder()
 				.withEntryTime(parkingRegister.getEntry())
 				.withTotalAmount(totalPrice)
