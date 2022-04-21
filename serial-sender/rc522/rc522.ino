@@ -15,30 +15,26 @@ void setup() {
 
 void loop() {
 
-  if (Serial.available() > 0) {
-    incomingByte = Serial.read();
-    if (incomingByte == '*') {
-      read_tag = true;
-      digitalWrite(8, 1);
-    }
-  }
+  
 
 
-  if (read_tag) {
+  
     if ( ! mfrc522.PICC_IsNewCardPresent()) {
       return;
     }
     if ( ! mfrc522.PICC_ReadCardSerial()) {
       return;
     }
-
+    digitalWrite(8, 1);
     char str[32] = "";
     array_to_string(mfrc522.uid.uidByte, mfrc522.uid.size, str);
+    Serial.print('#');
     Serial.println(str);
+    delay(500);
     mfrc522.PICC_HaltA();
     read_tag = false;
     digitalWrite(8, 0);
-  }
+  
 
 }
 

@@ -9,11 +9,28 @@ public class LoginResponse {
 	@JsonProperty
 	private String token;
 
-	private UserApi userApi;
+	@JsonProperty
+	private UserApi user;
 
-	public LoginResponse(String token, UserApi userApi) {
+	public LoginResponse(String token, UserApi user) {
 		this.token = token;
-		this.userApi = userApi;
+		this.user = user;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+	public UserApi getUser() {
+		return user;
+	}
+
+	public void setUser(UserApi user) {
+		this.user = user;
 	}
 
 }
