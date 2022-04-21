@@ -26,13 +26,15 @@ public class ParkingController {
 
 	@PostMapping(path = "/entry")
 	ResponseEntity<ParkingRegisterApi> registerEntry(@RequestParam("licenseCode") String licenseCode,
-									   @RequestParam("vehicleType") String vehicleType) throws GenericException {
+													 @RequestParam(value = "vehicleType", required = false)
+															 String vehicleType) throws GenericException {
 		ParkingRegisterApi parkingRegisterApi = parkingService.registerEntry(licenseCode, vehicleType);
 		return ResponseEntity.ok(parkingRegisterApi);
 	}
 
 	@PostMapping(path = "/exit")
-	ResponseEntity<ParkingRegisterApi> registerExit(@RequestParam("licenseCode") String licenseCode) throws GenericException {
+	ResponseEntity<ParkingRegisterApi> registerExit(@RequestParam("licenseCode") String licenseCode)
+			throws GenericException {
 		ParkingRegisterApi parkingRegisterApi = parkingService.registerExit(licenseCode);
 		return ResponseEntity.ok(parkingRegisterApi);
 	}

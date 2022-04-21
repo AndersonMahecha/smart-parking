@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import edu.co.sergio.arboleda.smartparkingapi.rest.api.UserApi;
+import edu.co.sergio.arboleda.smartparkingapi.rest.api.ClientApi;
 
 public class PaymentInfoResponse {
 
@@ -18,14 +18,17 @@ public class PaymentInfoResponse {
 	@JsonProperty
 	private BigDecimal totalAmount;
 	@JsonProperty
-	private UserApi user;
+	private ClientApi clientApi;
+	@JsonProperty
+	private String licensePlate;
 
 	private PaymentInfoResponse(Builder builder) {
 		entryTime = builder.entryTime;
 		exitTime = builder.exitTime;
 		totalMinutes = builder.totalMinutes;
 		totalAmount = builder.totalAmount;
-		user = builder.user;
+		clientApi = builder.clientApi;
+		licensePlate = builder.licensePlate;
 	}
 
 	public static Builder newBuilder() {
@@ -38,7 +41,8 @@ public class PaymentInfoResponse {
 		private LocalDateTime exitTime;
 		private long totalMinutes;
 		private BigDecimal totalAmount;
-		private UserApi user;
+		private ClientApi clientApi;
+		private String licensePlate;
 
 		private Builder() {
 		}
@@ -63,8 +67,13 @@ public class PaymentInfoResponse {
 			return this;
 		}
 
-		public Builder withUser(UserApi user) {
-			this.user = user;
+		public Builder withClientApi(ClientApi clientApi) {
+			this.clientApi = clientApi;
+			return this;
+		}
+
+		public Builder withLicensePlate(String licensePlate) {
+			this.licensePlate = licensePlate;
 			return this;
 		}
 

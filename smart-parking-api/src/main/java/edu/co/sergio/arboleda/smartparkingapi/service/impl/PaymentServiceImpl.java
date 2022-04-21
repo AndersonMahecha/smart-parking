@@ -14,7 +14,7 @@ import edu.co.sergio.arboleda.smartparkingapi.delegate.ClientDelegate;
 import edu.co.sergio.arboleda.smartparkingapi.repository.ParkingRegisterRepository;
 import edu.co.sergio.arboleda.smartparkingapi.repository.entity.Client;
 import edu.co.sergio.arboleda.smartparkingapi.repository.entity.ParkingRegister;
-import edu.co.sergio.arboleda.smartparkingapi.rest.api.UserApi;
+import edu.co.sergio.arboleda.smartparkingapi.rest.api.ClientApi;
 import edu.co.sergio.arboleda.smartparkingapi.rest.response.PaymentInfoResponse;
 import edu.co.sergio.arboleda.smartparkingapi.service.PaymentService;
 import edu.co.sergio.arboleda.smartparkingapi.util.exceptions.GenericException;
@@ -63,7 +63,8 @@ public class PaymentServiceImpl implements PaymentService {
 				.withEntryTime(parkingRegister.getEntry())
 				.withTotalAmount(totalPrice)
 				.withTotalMinutes(totalMinutes)
-				.withUser(modelMapper.map(client.getUser(), UserApi.class))
+				.withClientApi(modelMapper.map(client, ClientApi.class))
+				.withLicensePlate("ABC123")
 				.build();
 	}
 
