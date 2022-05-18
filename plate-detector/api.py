@@ -2,7 +2,7 @@ import re
 
 from flask import Flask, request, Response
 
-from plate_detector import data_uri_to_cv2_img, Detector
+from yolov5.plate_detector import data_uri_to_cv2_img, Detector
 
 app = Flask(__name__)
 detector = Detector()
