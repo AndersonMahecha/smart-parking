@@ -1,0 +1,46 @@
+from flask import Flask, jsonify, request
+from api.model.user import RequestUserSchema
+from api.repositories.user import UserRepository
+from api.services.user import UserService
+from marshmallow import ValidationError
+from api.repositories.mysql import db_session, init_db
+from api.repositories.models.user import User
+
+app = Flask(__name__)
+
+userRepository = UserRepository()
+userService = UserService(userRepository)
+
+init_db()
+# u = User('admin123', 'admin@localhost123')
+# db_session.add(u)
+# db_session.commit()
+
+
+@app.route("/api/v1/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok"}), 200
+
+
+@app.route("/api/v1/users", methods=["POST"])
+def create_user():
+    try:
+        user = RequestUserSchema().load(request.json)
+    except ValidationError as e:
+        return jsonify({"message": str(e)}), 400
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+    userService.create_user(user)
+    serialized_user = RequestUserSchema().dump(user)
+
+    return jsonify(serialized_user), 201
+
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
