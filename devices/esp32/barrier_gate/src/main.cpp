@@ -1,0 +1,139 @@
+#include <Arduino.h>
+#include <ESP32Servo.h>
+#include <Wire.h>
+#include <Adafruit_SSD1306.h>
+#include <Adafruit_GFX.h>
+
+#define SERVO_PIN 5
+#define BUTTON_PIN 34
+#define CLOSE_ANGLE 155
+#define OPEN_ANGLE 60
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+
+int targetAngle = 0;
+int currentAngle = 0;
+bool requireUpdate = false;
+
+void IRAM_ATTR updateTarget();
+void printlnCentered(String text);
+void welcomeMessage();
+
+Servo servo;
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+void setup()
+{
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
+  {
+    Serial.println(F("SSD1306 allocation failed"));
+    for (;;)
+      ;
+  }
+  delay(2000);
+
+  welcomeMessage();
+
+  servo.attach(SERVO_PIN, 500, 2400);
+  pinMode(BUTTON_PIN, INPUT);
+  pinMode(2, OUTPUT);
+
+  targetAngle = CLOSE_ANGLE;
+  currentAngle = 90;
+  servo.write(currentAngle);
+
+  delay(5000);
+
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), updateTarget, CHANGE);
+
+  display.clearDisplay();
+  display.display();
+}
+
+void loop()
+{
+
+  if (currentAngle < targetAngle)
+  {
+    digitalWrite(2, LOW);
+    currentAngle++;
+    display.setCursor(0, 0);
+    display.clearDisplay();
+    printlnCentered("Clossing barrier");
+  }
+  else if (currentAngle > targetAngle)
+  {
+    digitalWrite(2, LOW);
+    currentAngle--;
+    display.setCursor(0, 0);
+    display.clearDisplay();
+    printlnCentered("Opening barrier");
+  }
+  else
+  {
+    if (!requireUpdate)
+    {
+      if (targetAngle == CLOSE_ANGLE)
+      {
+        display.setCursor(0, 0);
+        display.clearDisplay();
+        printlnCentered("Barrier Closed");
+      }
+      else
+      {
+        display.setCursor(0, 0);
+        display.clearDisplay();
+        printlnCentered("Barrier Opened");
+      }
+      requireUpdate = true;
+    }
+    digitalWrite(2, HIGH);
+  }
+  servo.write(currentAngle);
+  if (requireUpdate)
+  {
+    requireUpdate = false;
+    display.display();
+  }
+  delay(10);
+}
+
+void updateTarget()
+{
+  if (digitalRead(BUTTON_PIN) == LOW)
+  {
+    targetAngle = CLOSE_ANGLE;
+  }
+  else
+  {
+    targetAngle = OPEN_ANGLE;
+  }
+
+  requireUpdate = true;
+}
+
+void printlnCentered(String text)
+{
+  int textWidth = text.length() * 6;
+  int x = (SCREEN_WIDTH - textWidth) / 2;
+  int y = display.getCursorY();
+  display.setCursor(x, y);
+  display.println(text);
+}
+
+void welcomeMessage()
+{
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(0, 0);
+  printlnCentered("Universidad");
+  printlnCentered("Sergio");
+  printlnCentered("Arboleda");
+  printlnCentered("");
+  printlnCentered("Edge Computing");
+  printlnCentered("Anderson Mahecha");
+  printlnCentered("Nicolas Torres");
+  printlnCentered("2024");
+  display.display();
+}
