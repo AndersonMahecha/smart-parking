@@ -1,16 +1,18 @@
 from api.model.user import User as UserModel
+from api.repositories.models.user import User as UserSchema
 
 
 class UserRepository:
-    def __init__(self):
-        self.users = []
+    def __init__(self, db_session):
+        self.db_session = db_session
 
     def create_user(self, user: UserModel):
-        self.users.append(user)
-        print("saved users", len(self.users))
-
-    def get_user(self, user_id: str) -> UserModel | None:
-        for user in self.users:
-            if user.identifier == user_id:
-                return user
-        return None
+        user_schema = UserSchema(
+            identifier=user.identifier,
+            first_name=user.first_name,
+            last_name=user.last_name,
+            username=user.username,
+            password=user.password,
+            role=user.role,
+        )
+        self.db_session.add(user_schema)

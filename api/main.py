@@ -1,20 +1,17 @@
 from flask import Flask, jsonify, request
+from marshmallow import ValidationError
+
 from api.model.user import RequestUserSchema
+from api.repositories.mysql import db_session, init_db
 from api.repositories.user import UserRepository
 from api.services.user import UserService
-from marshmallow import ValidationError
-from api.repositories.mysql import db_session, init_db
-from api.repositories.models.user import User
 
 app = Flask(__name__)
 
-userRepository = UserRepository()
+userRepository = UserRepository(db_session)
 userService = UserService(userRepository)
 
 init_db()
-# u = User('admin123', 'admin@localhost123')
-# db_session.add(u)
-# db_session.commit()
 
 
 @app.route("/api/v1/health", methods=["GET"])

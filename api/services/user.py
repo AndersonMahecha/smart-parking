@@ -1,7 +1,6 @@
-import uuid
-
-from api.repositories.user import UserRepository
 from api.model.user import User
+from api.repositories.user import UserRepository
+from api.repositories.models.user import User as UserSchema
 
 
 class UserService:
@@ -9,4 +8,5 @@ class UserService:
         self.user_repository = user_repository
 
     def create_user(self, user: User):
+
         self.user_repository.create_user(user)

@@ -4,8 +4,9 @@
 #include <Adafruit_SSD1306.h>
 #include <Adafruit_GFX.h>
 
-#define SERVO_PIN 5
-#define BUTTON_PIN 34
+#define SERVO_PIN 13
+#define BUTTON_PIN_A 19
+#define BUTTON_PIN_B 5
 #define CLOSE_ANGLE 155
 #define OPEN_ANGLE 60
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
@@ -35,7 +36,9 @@ void setup()
   welcomeMessage();
 
   servo.attach(SERVO_PIN, 500, 2400);
-  pinMode(BUTTON_PIN, INPUT);
+  pinMode(BUTTON_PIN_A, INPUT_PULLUP);
+  pinMode(BUTTON_PIN_B, INPUT_PULLUP);
+
   pinMode(2, OUTPUT);
 
   targetAngle = CLOSE_ANGLE;
@@ -44,7 +47,8 @@ void setup()
 
   delay(5000);
 
-  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), updateTarget, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN_A), updateTarget, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN_B), updateTarget, CHANGE);
 
   display.clearDisplay();
   display.display();
@@ -100,7 +104,7 @@ void loop()
 
 void updateTarget()
 {
-  if (digitalRead(BUTTON_PIN) == LOW)
+  if (digitalRead(BUTTON_PIN_A) == HIGH && digitalRead(BUTTON_PIN_B) == HIGH)
   {
     targetAngle = CLOSE_ANGLE;
   }

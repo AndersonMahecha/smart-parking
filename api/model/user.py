@@ -9,9 +9,7 @@ from marshmallow import (
     validate,
     EXCLUDE,
     post_dump,
-    pre_dump,
 )
-from marshmallow_enum import EnumField
 
 from api.utils.passwords import hash_password
 
@@ -21,10 +19,6 @@ class Role(Enum):
     cashier = "cashier"
     client = "client"
     operator = "operator"
-
-
-class RoleSchema(Schema):
-    role = EnumField(Role)
 
 
 class User(object):
