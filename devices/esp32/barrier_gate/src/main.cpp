@@ -7,8 +7,8 @@
 #include <SPI.h>
 
 #define SERVO_PIN 13
-#define BUTTON_PIN_A 12
-#define BUTTON_PIN_B 14
+#define BUTTON_PIN_A 14
+#define BUTTON_PIN_B 12
 #define SS_PIN 4
 #define RST_PIN 2
 
@@ -25,6 +25,9 @@
 #define WAIT_TIME 5 // in seconds to close the barrier
 
 #define MAX_PARKING_SPOTS 6
+
+#define DETECTION_VALUE HIGH
+#define NO_DETECTION_VALUE LOW
 
 int targetAngle = 0;
 int currentAngle = 0;
@@ -87,43 +90,52 @@ void setup()
 
 void loop()
 {
-
-  if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial())
+  if (digitalRead(BUTTON_PIN_A) == DETECTION_VALUE || digitalRead(BUTTON_PIN_B) == DETECTION_VALUE)
   {
-    // store the UID in a char* buffer
-    char uidString[10];
-    for (byte i = 0; i < rfid.uid.size; i++)
+    if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial())
     {
-      sprintf(uidString + 2 * i, "%02X", rfid.uid.uidByte[i]);
-    }
-
-    // check if the UID is already in the array
-    bool uidExists = false;
-    for (int i = 0; i < currentUsedSpots; i++)
-    {
-      Serial.println("Comparing UID");
-      Serial.println(uidString);
-      Serial.println(rfidTags[i]);
-      if (strcmp(rfidTags[i], uidString) == 0)
-      {
-        Serial.println("UID already in array");
-        uidExists = true;
+      if(currentUsedSpots >= MAX_PARKING_SPOTS){
+        return;
       }
-    }
+      // store the UID in a char* buffer
+      char uidString[10];
+      for (byte i = 0; i < rfid.uid.size; i++)
+      {
+        sprintf(uidString + 2 * i, "%02X", rfid.uid.uidByte[i]);
+      }
 
-    if (!uidExists)
-    {
-      Serial.println("UID added to array");
-      Serial.println(uidString);
-      rfidTags[currentUsedSpots] = strdup(uidString);
-      currentUsedSpots++;
-      requireUpdate = true;
-      targetAngle = OPEN_ANGLE;
-      startCloseTimmer();
-    }
+      // check if the UID is already in the array
+      bool uidExists = false;
+      for (int i = 0; i < currentUsedSpots; i++)
+      {
+        Serial.println("Comparing UID");
+        Serial.println(uidString);
+        Serial.println(rfidTags[i]);
+        if (strcmp(rfidTags[i], uidString) == 0)
+        {
+          Serial.println("UID already in array");
+          uidExists = true;
+        }
+      }
 
-    rfid.PICC_HaltA();
-    rfid.PCD_StopCrypto1();
+      if (!uidExists)
+      {
+        Serial.println("UID added to array");
+        Serial.println(uidString);
+        rfidTags[currentUsedSpots] = strdup(uidString);
+        currentUsedSpots++;
+        requireUpdate = true;
+        targetAngle = OPEN_ANGLE;
+        startCloseTimmer();
+      }
+
+      rfid.PICC_HaltA();
+      rfid.PCD_StopCrypto1();
+    }
+  }
+  else
+  {
+    delay(10);
   }
 
   if (currentAngle < targetAngle)
@@ -161,7 +173,7 @@ void loop()
 
 void IRAM_ATTR updateTarget()
 {
-  if (digitalRead(BUTTON_PIN_A) == HIGH && digitalRead(BUTTON_PIN_B) == HIGH)
+  if (digitalRead(BUTTON_PIN_A) == NO_DETECTION_VALUE && digitalRead(BUTTON_PIN_B) == NO_DETECTION_VALUE)
   {
     startCloseTimmer();
   }
@@ -178,7 +190,7 @@ void startCloseTimmer()
 
 void IRAM_ATTR closeWithDelay()
 {
-  if (digitalRead(BUTTON_PIN_A) == LOW && digitalRead(BUTTON_PIN_B) == LOW)
+  if (digitalRead(BUTTON_PIN_A) == DETECTION_VALUE || digitalRead(BUTTON_PIN_B) == DETECTION_VALUE)
   {
     timerStop(closeTimmer);
     return;
@@ -203,6 +215,7 @@ void welcomeMessage()
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setCursor(0, 0);
+  display.setRotation(2);
   printlnCentered("Universidad");
   printlnCentered("Sergio");
   printlnCentered("Arboleda");
@@ -220,6 +233,7 @@ void showAllData()
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setCursor(0, 0);
+  display.setRotation(2);
   switch (barrierState)
   {
   case BARRIER_CLOSED:
