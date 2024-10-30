@@ -24,5 +24,8 @@ def init_db():
     # they will be registered properly on the metadata.  Otherwise
     # you will have to import them first before calling init_db()
     import api.repositories.models.user
+    import api.repositories.models.parking_slot
+    import api.repositories.models.vehicle
+    import api.repositories.models.card
 
     Base.metadata.create_all(bind=engine)

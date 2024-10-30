@@ -29,7 +29,7 @@ class User(object):
         last_name="",
         username="",
         password="",
-        role=None,
+        role=Role,
     ):
         if role != "client" and (username == "" or password == ""):
             raise ValueError(
@@ -46,7 +46,7 @@ class User(object):
         else:
             self.password = password
 
-        self.role = Role[role]
+        self.role = role
         self.created_at = datetime.now()
 
     def __repr__(self):
@@ -73,6 +73,7 @@ class RequestUserSchema(Schema):
 
     @post_load
     def make_user(self, data, **kwargs):
+        data["role"] = Role(data["role"])
         return User(**data)
 
     @post_dump(pass_original=True)
