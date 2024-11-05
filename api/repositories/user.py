@@ -1,5 +1,5 @@
 from api.model.user import User as UserModel
-from api.repositories.models.user import User as UserSchema
+from api.repositories.models.user import User as UserEntity
 
 
 class UserRepository:
@@ -7,7 +7,7 @@ class UserRepository:
         self.db_session = db_session
 
     def create_user(self, user: UserModel):
-        user_schema = UserSchema(
+        entity = UserEntity(
             identifier=user.identifier,
             first_name=user.first_name,
             last_name=user.last_name,
@@ -15,12 +15,12 @@ class UserRepository:
             password=user.password,
             role=user.role.value,
         )
-        self.db_session.add(user_schema)
+        self.db_session.add(entity)
         self.db_session.commit()
 
-    def get_user_by_username(self, username: str) -> UserModel:
+    def get_user_by_username(self, username: str) -> UserModel | None:
         user_schema = (
-            self.db_session.query(UserSchema).filter_by(username=username).first()
+            self.db_session.query(UserEntity).filter_by(username=username).first()
         )
 
         if user_schema is None:
