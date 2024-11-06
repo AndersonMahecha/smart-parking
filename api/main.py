@@ -54,6 +54,16 @@ def authenticate_user():
     return jsonify(serialized_user), 200
 
 
+@app.route("/api/v1/entries", methods=["POST"])
+def register_entry():
+    try:
+        card_id = request.form.get("card_id")
+        vehicle_plate = request.form.get("vehicle_plate")
+        vehicle_image = request.files.get("vehicle_image")
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.remove()

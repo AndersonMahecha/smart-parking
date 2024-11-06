@@ -7,7 +7,7 @@ import uuid
 class CardRepositoryModel(Base):
     __tablename__ = "cards"
 
-    identifier = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    identifier = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     card_id = Column(String(10), unique=True, nullable=False)
     short_code = Column(String(6), unique=True, nullable=False)
 
