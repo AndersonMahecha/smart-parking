@@ -2,14 +2,27 @@ from flask import Flask, jsonify, request
 from marshmallow import ValidationError
 
 from api.model.user import RequestUserSchema
+from api.repositories.card import CardRepository
 from api.repositories.mysql import db_session, init_db
+from api.repositories.parking_slot import ParkingSlotRepository
 from api.repositories.user import UserRepository
+from api.repositories.vehicle import VehicleRepository
+from api.services.parking_service import ParkingService
 from api.services.user import UserService
 
 app = Flask(__name__)
 
 userRepository = UserRepository(db_session)
+vehicleRepository = VehicleRepository(db_session)
+parkingSlotsRepository = ParkingSlotRepository(db_session)
+cardRepository = CardRepository(db_session)
+
 userService = UserService(userRepository)
+parkingService = ParkingService(
+    vehicle_repository=vehicleRepository,
+    parking_slots_repository=parkingSlotsRepository,
+    cards_repository=cardRepository,
+)
 
 init_db()
 
@@ -57,11 +70,13 @@ def authenticate_user():
 @app.route("/api/v1/entries", methods=["POST"])
 def register_entry():
     try:
-        card_id = request.form.get("card_id")
-        vehicle_plate = request.form.get("vehicle_plate")
+        card_id = request.args.get("card_id")
+        vehicle_plate = request.args.get("vehicle_plate")
         vehicle_image = request.files.get("vehicle_image")
     except Exception as e:
         return jsonify({"message": str(e)}), 500
+
+    return jsonify({"message": "Entry registered successfully"}), 201
 
 
 @app.teardown_appcontext
