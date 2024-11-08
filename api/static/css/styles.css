@@ -1,0 +1,133 @@
+:root {
+    --brand-color: #ffcc01;
+    --brand-color-light: #ffcc016e;
+    --gray-content: rgb(220, 220, 220);
+    --gray-footer: rgb(240, 240, 240);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+.box {
+    display: flex;
+    align-items: center;
+}
+
+.actual-option {
+    background-color: var(--brand-color-light);
+    /* dar zoom al div */
+    transform: scale(1.15);
+}
+
+input, select{
+    padding: 5px 15px;
+    border: none;
+    border-radius: 10px;
+
+}
+
+button{
+    padding: 5px 5px;
+    border: none;
+    border-radius: 10px;
+}
+
+header {
+    background-color: var(--brand-color);
+    padding: 10px 30px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#logo {
+    width: 60px;
+    height: 60px;
+}
+
+#tap-user .box {
+    gap: 10px;
+}
+
+#tap-user a {
+    align-items: center;
+}
+
+main {
+    display: flex;
+    height: 100vh;
+}
+
+#left-menu {
+    width: 20%;
+    max-width: 300px;
+    padding: 20px;
+}
+
+#item-left-menu {
+    padding: 10px;
+    margin: 10px;
+    gap: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+
+    cursor: pointer;
+}
+
+#item-left-menu img {
+    width: 35px;
+    height: 35px;
+}
+
+#item-left-menu:hover {
+    background-color: var(--brand-color-light);
+    /* dar zoom al div */
+    transform: scale(1.15);
+}
+
+#section-content {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: var(--gray-content);
+
+    gap:30px;
+    width: 100%;
+
+    padding: 30px;
+}
+
+#formulario form{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 400px;
+}
+
+footer {
+    background-color: var(--gray-footer);
+    /* background-color: #ffcc016e; */
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#github-icon {
+    transition: all 0.3s ease;
+}
+
+#github-icon:hover {
+    /* background-color: black; */
+    content: url('../assets/github-favicon-dark.png');
+    /* Replace with the path to your hover image */
+}
