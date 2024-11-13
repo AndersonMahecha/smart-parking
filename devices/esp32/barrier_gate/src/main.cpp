@@ -6,9 +6,11 @@
 #include <MFRC522.h>
 #include <SPI.h>
 #include <WiFi.h>
-#include <ArduinoWebsockets.h>
-
-using namespace websockets;
+#include <WiFiClientSecure.h>
+#include <WiFiMulti.h>
+#include <HTTPClient.h>
+#include <WebSocketsClient.h>
+#include <SocketIOclient.h>
 
 #define SERVO_PIN 13
 #define BUTTON_PIN_A 14
@@ -35,7 +37,7 @@ using namespace websockets;
 
 #define ssid "FamiliaMahechaSalamanca"
 #define password "Nirvana77"
-#define websocket_server "192.168.10.15:8080"
+#define websocket_server "http://192.168.10.25:8080"
 
 int targetAngle = 0;
 int currentAngle = 0;
@@ -53,19 +55,17 @@ void printlnCentered(String text);
 void welcomeMessage();
 void showAllData();
 void startCloseTimmer();
-void connect_wifi();
-void onMessageCallback(WebsocketsMessage message);
-void onEventsCallback(WebsocketsEvent event, String data);
+void socketIOEvent(socketIOmessageType_t type, uint8_t *payload, size_t length);
 
 Servo servo;
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 MFRC522 rfid = MFRC522(SS_PIN, RST_PIN);
-WebsocketsClient client;
+WiFiMulti WiFiMulti;
+SocketIOclient socketIO;
 
 void setup()
 
 {
-
   Serial.begin(9600);
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))
   {
@@ -77,41 +77,23 @@ void setup()
   Serial.println("Starting WiFi");
   Serial.print("[WiFi] Connecting to ");
   Serial.println(ssid);
-  connect_wifi();
 
-  HTTPClient http;
+  WiFiMulti.addAP(ssid, password);
 
-  http.begin("http://192.168.10.15:8080/api/v1/health");
-
-  int httpResponseCode = http.GET();
-
-  if (httpResponseCode > 0)
+  while (WiFiMulti.run() != WL_CONNECTED)
   {
-    String payload = http.getString(); // Obtiene la respuesta como String
-    Serial.println(httpResponseCode);  // Imprime el código de respuesta
-    Serial.println(payload);           // Imprime el contenido de la respuesta
-  }
-  else
-  {
-    Serial.print("Error en la petición GET: ");
-    Serial.println(httpResponseCode);
-  }
-  http.end(); // Cierra la conexión
-  /* client.onMessage(onMessageCallback);
-  client.onEvent(onEventsCallback);
-
-  // Connect to server
-  while (!client.connect(websocket_server))
-  {
-    Serial.print("[Websockets] Connecting to ");
-    Serial.println(websocket_server);
-    delay(1000);
+    delay(100);
   }
 
-  // Send a message
-  client.send("Hi Server!");
-  // Send a ping
-  client.ping(); */
+  String ip = WiFi.localIP().toString();
+  Serial.printf("[SETUP] WiFi Connected %s\n", ip.c_str());
+
+  socketIO.configureEIOping(true);
+  // server address, port and URL
+  socketIO.begin("192.168.10.25", 8080, "/socket.io/?EIO=4");
+
+  // event handler
+  socketIO.onEvent(socketIOEvent);
 
   SPI.begin();
   rfid.PCD_Init();
@@ -142,87 +124,88 @@ void setup()
 
 void loop()
 {
-  //client.poll();
-  if (digitalRead(BUTTON_PIN_A) == DETECTION_VALUE || digitalRead(BUTTON_PIN_B) == DETECTION_VALUE)
-  {
-    if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial())
-    {
-      if (currentUsedSpots >= MAX_PARKING_SPOTS)
-      {
-        return;
-      }
-      // store the UID in a char* buffer
-      char uidString[10];
-      for (byte i = 0; i < rfid.uid.size; i++)
-      {
-        sprintf(uidString + 2 * i, "%02X", rfid.uid.uidByte[i]);
-      }
+  socketIO.loop();
 
-      // check if the UID is already in the array
-      bool uidExists = false;
-      for (int i = 0; i < currentUsedSpots; i++)
-      {
-        Serial.println("Comparing UID");
-        Serial.println(uidString);
-        Serial.println(rfidTags[i]);
-        if (strcmp(rfidTags[i], uidString) == 0)
-        {
-          Serial.println("UID already in array");
-          uidExists = true;
-        }
-      }
+  /*  if (digitalRead(BUTTON_PIN_A) == DETECTION_VALUE || digitalRead(BUTTON_PIN_B) == DETECTION_VALUE)
+   {
+     if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial())
+     {
+       if (currentUsedSpots >= MAX_PARKING_SPOTS)
+       {
+         return;
+       }
+       // store the UID in a char* buffer
+       char uidString[10];
+       for (byte i = 0; i < rfid.uid.size; i++)
+       {
+         sprintf(uidString + 2 * i, "%02X", rfid.uid.uidByte[i]);
+       }
 
-      if (!uidExists)
-      {
-        Serial.println("UID added to array");
-        Serial.println(uidString);
-        rfidTags[currentUsedSpots] = strdup(uidString);
-        currentUsedSpots++;
-        requireUpdate = true;
-        targetAngle = OPEN_ANGLE;
-        startCloseTimmer();
-      }
+       // check if the UID is already in the array
+       bool uidExists = false;
+       for (int i = 0; i < currentUsedSpots; i++)
+       {
+         Serial.println("Comparing UID");
+         Serial.println(uidString);
+         Serial.println(rfidTags[i]);
+         if (strcmp(rfidTags[i], uidString) == 0)
+         {
+           Serial.println("UID already in array");
+           uidExists = true;
+         }
+       }
 
-      rfid.PICC_HaltA();
-      rfid.PCD_StopCrypto1();
-    }
-  }
-  else
-  {
-    delay(10);
-  }
+       if (!uidExists)
+       {
+         Serial.println("UID added to array");
+         Serial.println(uidString);
+         rfidTags[currentUsedSpots] = strdup(uidString);
+         currentUsedSpots++;
+         requireUpdate = true;
+         targetAngle = OPEN_ANGLE;
+         startCloseTimmer();
+       }
 
-  if (currentAngle < targetAngle)
-  {
-    currentAngle++;
-    barrierState = BARRIER_CLOSING;
-  }
-  else if (currentAngle > targetAngle)
-  {
-    currentAngle--;
-    barrierState = BARRIER_OPENING;
-  }
-  else
-  {
-    if (!requireUpdate)
-    {
-      if (targetAngle == CLOSE_ANGLE)
-      {
-        barrierState = BARRIER_CLOSED;
-      }
-      else
-      {
-        barrierState = BARRIER_OPENED;
-      }
-      requireUpdate = true;
-    }
-  }
-  servo.write(currentAngle);
-  if (requireUpdate)
-  {
-    requireUpdate = false;
-    showAllData();
-  }
+       rfid.PICC_HaltA();
+       rfid.PCD_StopCrypto1();
+     }
+   }
+   else
+   {
+     delay(10);
+   }
+
+   if (currentAngle < targetAngle)
+   {
+     currentAngle++;
+     barrierState = BARRIER_CLOSING;
+   }
+   else if (currentAngle > targetAngle)
+   {
+     currentAngle--;
+     barrierState = BARRIER_OPENING;
+   }
+   else
+   {
+     if (!requireUpdate)
+     {
+       if (targetAngle == CLOSE_ANGLE)
+       {
+         barrierState = BARRIER_CLOSED;
+       }
+       else
+       {
+         barrierState = BARRIER_OPENED;
+       }
+       requireUpdate = true;
+     }
+   }
+   servo.write(currentAngle);
+   if (requireUpdate)
+   {
+     requireUpdate = false;
+     showAllData();
+   } */
 }
 
 void IRAM_ATTR updateTarget()
@@ -323,85 +306,38 @@ void dump_byte_array(byte *buffer, byte bufferSize)
     Serial.print(buffer[i], HEX);
   }
 }
-
-void connect_wifi()
+void socketIOEvent(socketIOmessageType_t type, uint8_t *payload, size_t length)
 {
-  WiFi.begin(ssid, password);
-
-  int tryDelay = 500;
-  int numberOfTries = 20;
-
-  // Wait for the WiFi event
-  while (true)
+  switch (type)
   {
+  case sIOtype_DISCONNECT:
+    Serial.printf("[IOc] Disconnected!\n");
+    dump_byte_array(payload, length);
+    break;
+  case sIOtype_CONNECT:
+    Serial.printf("[IOc] Connected to url: %s\n", payload);
 
-    switch (WiFi.status())
-    {
-    case WL_NO_SSID_AVAIL:
-      Serial.println("[WiFi] SSID not found");
-      break;
-    case WL_CONNECT_FAILED:
-      Serial.print("[WiFi] Failed - WiFi not connected! Reason: ");
-      return;
-      break;
-    case WL_CONNECTION_LOST:
-      Serial.println("[WiFi] Connection was lost");
-      break;
-    case WL_SCAN_COMPLETED:
-      Serial.println("[WiFi] Scan is completed");
-      break;
-    case WL_DISCONNECTED:
-      Serial.println("[WiFi] WiFi is disconnected");
-      break;
-    case WL_CONNECTED:
-      Serial.println("[WiFi] WiFi is connected!");
-      Serial.print("[WiFi] IP address: ");
-      Serial.println(WiFi.localIP());
-      return;
-      break;
-    default:
-      Serial.print("[WiFi] WiFi Status: ");
-      Serial.println(WiFi.status());
-      break;
-    }
-    delay(tryDelay);
-
-    if (numberOfTries <= 0)
-    {
-      Serial.print("[WiFi] Failed to connect to WiFi!");
-      // Use disconnect function to force stop trying to connect
-      WiFi.disconnect();
-      return;
-    }
-    else
-    {
-      numberOfTries--;
-    }
-  }
-}
-
-void onMessageCallback(WebsocketsMessage message)
-{
-  Serial.print("Got Message: ");
-  Serial.println(message.data());
-}
-
-void onEventsCallback(WebsocketsEvent event, String data)
-{
-  if (event == WebsocketsEvent::ConnectionOpened)
-  {
-    Serial.println("Connnection Opened");
-  }
-  else if (event == WebsocketsEvent::ConnectionClosed)
-  {
-    Serial.println("Connnection Closed");
-  }
-  else if (event == WebsocketsEvent::GotPing)
-  {
-    Serial.println("Got a Ping!");
-  }
-  else if (event == WebsocketsEvent::GotPong)
-  {
-    Serial.println("Got a Pong!");
+    // join default namespace (no auto join in Socket.IO V3)
+    socketIO.send(sIOtype_CONNECT, "/");
+    break;
+  case sIOtype_EVENT:
+    Serial.printf("[IOc] get event: %s\n", payload);
+    break;
+  case sIOtype_ACK:
+    Serial.printf("[IOc] get ack: %u\n", length);
+    dump_byte_array(payload, length);
+    break;
+  case sIOtype_ERROR:
+    Serial.printf("[IOc] get error: %u\n", length);
+    dump_byte_array(payload, length);
+    break;
+  case sIOtype_BINARY_EVENT:
+    Serial.printf("[IOc] get binary: %u\n", length);
+    dump_byte_array(payload, length);
+    break;
+  case sIOtype_BINARY_ACK:
+    Serial.printf("[IOc] get binary ack: %u\n", length);
+    dump_byte_array(payload, length);
+    break;
   }
 }

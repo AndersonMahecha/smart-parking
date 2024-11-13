@@ -12,4 +12,4 @@ export DB_PASSWORD
 export DB_HOST
 export DB_NAME
 
-pipenv run flask --debug run -h 0.0.0.0 --port 8080
+flask --debug run -h 0.0.0.0 --port 8080

@@ -19,9 +19,6 @@ from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
-app.debug = True
-CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
 
 userRepository = UserRepository(db_session)
 vehicleRepository = VehicleRepository(db_session)
@@ -114,26 +111,13 @@ def get_system_status():
     return jsonify({"vehicles": 120, "parking_slots": 10}), 200
 
 
-@socketio.on("connect")
-def client_sign_in():
-    clients.append(request.sid)
-    print("Client connected", request.sid)
-
-
-@socketio.on("disconnect")
-def client_sign_out():
-    if request.sid in clients:
-        clients.remove(request.sid)
-    print("Client disconnected", request.sid)
-
-
 @app.teardown_appcontext
 def shutdown_session(exception=None):
     db_session.remove()
 
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=8080, allow_unsafe_werkzeug=True)
+    app.run(host="0.0.0.0", port=8080, allow_unsafe_werkzeug=True)
 
 
 def random_plate():
