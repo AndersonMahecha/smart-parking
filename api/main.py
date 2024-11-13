@@ -20,8 +20,8 @@ from flask_socketio import SocketIO
 
 app = Flask(__name__)
 app.debug = True
-socketio = SocketIO(app, cors_allowed_origins="*")
 CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 userRepository = UserRepository(db_session)
 vehicleRepository = VehicleRepository(db_session)
@@ -51,8 +51,10 @@ def create_user():
         user = RequestUserSchema().load(request.json)
     except ValidationError as e:
         return jsonify({"message": str(e)}), 400
-    except Exception as e:
-        return jsonify({"message": str(e)}), 500
+    except DomainError as e:
+        return jsonify({"message": str(e)}), 400
+    except KeyError as e:
+        return jsonify({"message": f"Missing required field: {e}"}), 400
 
     userService.create_user(user)
     serialized_user = RequestUserSchema().dump(user)
@@ -67,8 +69,6 @@ def authenticate_user():
         password = request.json["password"]
     except KeyError as e:
         return jsonify({"message": f"Missing required field: {e}"}), 400
-    except Exception as e:
-        return jsonify({"message": str(e)}), 500
 
     user = userService.authenticate_user(username, password)
 
@@ -91,11 +91,12 @@ def register_entry():
         vehicle_request = VehicleSchema().load(request.json)
         vehicle_image = request.files.get("vehicle_image")
         card_id = request.args.get("card_id")
+    except ValidationError as e:
+        return jsonify({"message": str(e)}), 400
     except DomainError as e:
         return jsonify({"message": str(e)}), 400
-    except Exception as e:
-
-        return jsonify({"message": str(e)}), 500
+    except KeyError as e:
+        return jsonify({"message": f"Missing required field: {e}"}), 400
 
     try:
         vehicle = parkingService.register_vehicle_entry(vehicle_request, card_id)
@@ -121,7 +122,8 @@ def client_sign_in():
 
 @socketio.on("disconnect")
 def client_sign_out():
-    clients.remove(request.sid)
+    if request.sid in clients:
+        clients.remove(request.sid)
     print("Client disconnected", request.sid)
 
 
@@ -131,7 +133,7 @@ def shutdown_session(exception=None):
 
 
 if __name__ == "__main__":
-    socketio.run(app=app, host="0.0.0.0", port=8080, allow_unsafe_werkzeug=True)
+    socketio.run(app, host="0.0.0.0", port=8080, allow_unsafe_werkzeug=True)
 
 
 def random_plate():

@@ -5,6 +5,10 @@
 #include <Adafruit_GFX.h>
 #include <MFRC522.h>
 #include <SPI.h>
+#include <WiFi.h>
+#include <ArduinoWebsockets.h>
+
+using namespace websockets;
 
 #define SERVO_PIN 13
 #define BUTTON_PIN_A 14
@@ -29,6 +33,10 @@
 #define DETECTION_VALUE HIGH
 #define NO_DETECTION_VALUE LOW
 
+#define ssid "FamiliaMahechaSalamanca"
+#define password "Nirvana77"
+#define websocket_server "192.168.10.15:8080"
+
 int targetAngle = 0;
 int currentAngle = 0;
 bool requireUpdate = false;
@@ -45,12 +53,17 @@ void printlnCentered(String text);
 void welcomeMessage();
 void showAllData();
 void startCloseTimmer();
+void connect_wifi();
+void onMessageCallback(WebsocketsMessage message);
+void onEventsCallback(WebsocketsEvent event, String data);
 
 Servo servo;
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 MFRC522 rfid = MFRC522(SS_PIN, RST_PIN);
+WebsocketsClient client;
 
 void setup()
+
 {
 
   Serial.begin(9600);
@@ -60,6 +73,45 @@ void setup()
     for (;;)
       ;
   }
+
+  Serial.println("Starting WiFi");
+  Serial.print("[WiFi] Connecting to ");
+  Serial.println(ssid);
+  connect_wifi();
+
+  HTTPClient http;
+
+  http.begin("http://192.168.10.15:8080/api/v1/health");
+
+  int httpResponseCode = http.GET();
+
+  if (httpResponseCode > 0)
+  {
+    String payload = http.getString(); // Obtiene la respuesta como String
+    Serial.println(httpResponseCode);  // Imprime el código de respuesta
+    Serial.println(payload);           // Imprime el contenido de la respuesta
+  }
+  else
+  {
+    Serial.print("Error en la petición GET: ");
+    Serial.println(httpResponseCode);
+  }
+  http.end(); // Cierra la conexión
+  /* client.onMessage(onMessageCallback);
+  client.onEvent(onEventsCallback);
+
+  // Connect to server
+  while (!client.connect(websocket_server))
+  {
+    Serial.print("[Websockets] Connecting to ");
+    Serial.println(websocket_server);
+    delay(1000);
+  }
+
+  // Send a message
+  client.send("Hi Server!");
+  // Send a ping
+  client.ping(); */
 
   SPI.begin();
   rfid.PCD_Init();
@@ -90,11 +142,13 @@ void setup()
 
 void loop()
 {
+  //client.poll();
   if (digitalRead(BUTTON_PIN_A) == DETECTION_VALUE || digitalRead(BUTTON_PIN_B) == DETECTION_VALUE)
   {
     if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial())
     {
-      if(currentUsedSpots >= MAX_PARKING_SPOTS){
+      if (currentUsedSpots >= MAX_PARKING_SPOTS)
+      {
         return;
       }
       // store the UID in a char* buffer
@@ -267,5 +321,87 @@ void dump_byte_array(byte *buffer, byte bufferSize)
   {
     Serial.print(buffer[i] < 0x10 ? " 0" : " ");
     Serial.print(buffer[i], HEX);
+  }
+}
+
+void connect_wifi()
+{
+  WiFi.begin(ssid, password);
+
+  int tryDelay = 500;
+  int numberOfTries = 20;
+
+  // Wait for the WiFi event
+  while (true)
+  {
+
+    switch (WiFi.status())
+    {
+    case WL_NO_SSID_AVAIL:
+      Serial.println("[WiFi] SSID not found");
+      break;
+    case WL_CONNECT_FAILED:
+      Serial.print("[WiFi] Failed - WiFi not connected! Reason: ");
+      return;
+      break;
+    case WL_CONNECTION_LOST:
+      Serial.println("[WiFi] Connection was lost");
+      break;
+    case WL_SCAN_COMPLETED:
+      Serial.println("[WiFi] Scan is completed");
+      break;
+    case WL_DISCONNECTED:
+      Serial.println("[WiFi] WiFi is disconnected");
+      break;
+    case WL_CONNECTED:
+      Serial.println("[WiFi] WiFi is connected!");
+      Serial.print("[WiFi] IP address: ");
+      Serial.println(WiFi.localIP());
+      return;
+      break;
+    default:
+      Serial.print("[WiFi] WiFi Status: ");
+      Serial.println(WiFi.status());
+      break;
+    }
+    delay(tryDelay);
+
+    if (numberOfTries <= 0)
+    {
+      Serial.print("[WiFi] Failed to connect to WiFi!");
+      // Use disconnect function to force stop trying to connect
+      WiFi.disconnect();
+      return;
+    }
+    else
+    {
+      numberOfTries--;
+    }
+  }
+}
+
+void onMessageCallback(WebsocketsMessage message)
+{
+  Serial.print("Got Message: ");
+  Serial.println(message.data());
+}
+
+void onEventsCallback(WebsocketsEvent event, String data)
+{
+  if (event == WebsocketsEvent::ConnectionOpened)
+  {
+    Serial.println("Connnection Opened");
+  }
+  else if (event == WebsocketsEvent::ConnectionClosed)
+  {
+    Serial.println("Connnection Closed");
+  }
+  else if (event == WebsocketsEvent::GotPing)
+  {
+    Serial.println("Got a Ping!");
+  }
+  else if (event == WebsocketsEvent::GotPong)
+  {
+    Serial.println("Got a Pong!");
   }
 }
