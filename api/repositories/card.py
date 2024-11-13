@@ -1,3 +1,4 @@
+from api.model.exceptions import DomainError
 from api.repositories.models.card import CardRepositoryModel
 from sqlalchemy.orm import Session
 from api.model.card import Card as CardModel
@@ -25,8 +26,10 @@ class CardRepository:
         if card is None:
             return None
 
-        if card.short_code is not None and short_code is not None:
-            raise Exception("Card already has a short code")
+        if (
+            card.short_code is not None and card.short_code != ""
+        ) and short_code is not None:
+            raise DomainError("Card already has a short code")
 
         card.short_code = short_code
 

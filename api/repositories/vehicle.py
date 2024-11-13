@@ -7,16 +7,22 @@ class VehicleRepository:
         self.db_session = db_session
 
     def create_vehicle(self, vehicle: VehicleModel):
+        identifier = vehicle.identifier if vehicle.identifier is not None else None
+        parking_slot_id = (
+            vehicle.parking_slot_id if vehicle.parking_slot_id is not None else None
+        )
+        entry_date = vehicle.entry_date if vehicle.entry_date is not None else None
         entity = VehicleEntity(
-            identifier=vehicle.identifier,
+            identifier=identifier,
             license_plate=vehicle.license_plate,
             short_code=vehicle.short_code,
             vehicle_type=vehicle.vehicle_type.value,
-            entry_date=vehicle.entry_date,
-            parking_slot_id=vehicle.parking_slot_id,
+            entry_date=entry_date,
+            parking_slot_id=parking_slot_id,
         )
         self.db_session.add(entity)
         self.db_session.commit()
+        return entity
 
     def get_vehicle_by_license_plate(self, license_plate: str) -> VehicleModel | None:
         vehicle_schema = (

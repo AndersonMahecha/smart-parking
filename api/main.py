@@ -1,7 +1,13 @@
+import random
+import string
+
+import socketio
 from flask import Flask, jsonify, request
 from marshmallow import ValidationError
 
+from api.model.exceptions import DomainError
 from api.model.user import RequestUserSchema
+from api.model.vehicle import VehicleSchema
 from api.repositories.card import CardRepository
 from api.repositories.mysql import db_session, init_db
 from api.repositories.parking_slot import ParkingSlotRepository
@@ -9,8 +15,13 @@ from api.repositories.user import UserRepository
 from api.repositories.vehicle import VehicleRepository
 from api.services.parking_service import ParkingService
 from api.services.user import UserService
+from flask_cors import CORS, cross_origin
+from flask_socketio import SocketIO
 
 app = Flask(__name__)
+app.debug = True
+socketio = SocketIO(app, cors_allowed_origins="*")
+CORS(app)
 
 userRepository = UserRepository(db_session)
 vehicleRepository = VehicleRepository(db_session)
@@ -25,6 +36,8 @@ parkingService = ParkingService(
 )
 
 init_db()
+
+clients = []
 
 
 @app.route("/api/v1/health", methods=["GET"])
@@ -67,16 +80,49 @@ def authenticate_user():
     return jsonify(serialized_user), 200
 
 
+def notify_clients():
+    for client in clients:
+        socketio.emit("update", room=client)
+
+
 @app.route("/api/v1/entries", methods=["POST"])
 def register_entry():
     try:
-        card_id = request.args.get("card_id")
-        vehicle_plate = request.args.get("vehicle_plate")
+        vehicle_request = VehicleSchema().load(request.json)
         vehicle_image = request.files.get("vehicle_image")
+        card_id = request.args.get("card_id")
+    except DomainError as e:
+        return jsonify({"message": str(e)}), 400
     except Exception as e:
+
         return jsonify({"message": str(e)}), 500
 
-    return jsonify({"message": "Entry registered successfully"}), 201
+    try:
+        vehicle = parkingService.register_vehicle_entry(vehicle_request, card_id)
+    except DomainError as e:
+        return jsonify({"message": str(e)}), 400
+
+    serialized_vehicle = VehicleSchema().dump(vehicle)
+
+    notify_clients()
+    return jsonify(serialized_vehicle), 201
+
+
+@app.route("/api/v1/system/status", methods=["GET"])
+def get_system_status():
+    return jsonify({"vehicles": 120, "parking_slots": 10}), 200
+
+
+@socketio.on("connect")
+def client_sign_in():
+    clients.append(request.sid)
+    print("Client connected", request.sid)
+
+
+@socketio.on("disconnect")
+def client_sign_out():
+    clients.remove(request.sid)
+    print("Client disconnected", request.sid)
 
 
 @app.teardown_appcontext
@@ -85,4 +131,8 @@ def shutdown_session(exception=None):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    socketio.run(app=app, host="0.0.0.0", port=8080, allow_unsafe_werkzeug=True)
+
+
+def random_plate():
+    return "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
