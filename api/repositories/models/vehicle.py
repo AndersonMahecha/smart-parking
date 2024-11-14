@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from sqlalchemy import Column, String, ForeignKey, TIMESTAMP
 
@@ -9,10 +10,10 @@ class Vehicle(Base):
     __tablename__ = "vehicles"
 
     identifier = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    license_plate = Column(String(10), unique=True, nullable=True)
-    short_code = Column(String(6), unique=True, nullable=True)
+    license_plate = Column(String(10), unique=True, nullable=True, index=True)
+    short_code = Column(String(6), unique=True, nullable=True, index=True)
     vehicle_type = Column(String(10), nullable=False)
-    entry_date = Column(TIMESTAMP, nullable=False)
+    entry_date = Column(TIMESTAMP, nullable=False, default=datetime.now())
     parking_slot_id = Column(
         String(36), ForeignKey("parking_slots.identifier"), nullable=True
     )

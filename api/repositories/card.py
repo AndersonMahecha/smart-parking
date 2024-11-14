@@ -1,5 +1,7 @@
+from api.model.exceptions import DomainError
 from api.repositories.models.card import CardRepositoryModel
 from sqlalchemy.orm import Session
+from api.model.card import Card as CardModel
 
 
 class CardRepository:
@@ -16,7 +18,7 @@ class CardRepository:
 
         return card.short_code
 
-    def update_card(self, card_id: str, short_code: str):
+    def update_card(self, card_id: str, short_code: str | None) -> None:
         card = (
             self.session.query(CardRepositoryModel).filter_by(card_id=card_id).first()
         )
@@ -24,5 +26,25 @@ class CardRepository:
         if card is None:
             return None
 
+        if (
+            card.short_code is not None and card.short_code != ""
+        ) and short_code is not None:
+            raise DomainError("Card already has a short code")
+
         card.short_code = short_code
+
         self.session.commit()
+
+    def get_by_id(self, card_id: str) -> CardModel | None:
+        card = (
+            self.session.query(CardRepositoryModel).filter_by(card_id=card_id).first()
+        )
+
+        if card is None:
+            return None
+
+        return CardModel(
+            identifier=card.identifier,
+            card_id=card.card_id,
+            short_code=card.short_code,
+        )
