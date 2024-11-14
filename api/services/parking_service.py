@@ -47,6 +47,7 @@ class ParkingService:
             license_plate=vehicle.license_plate,
             short_code=short_code,
             vehicle_type=vehicle.vehicle_type,
+            entry_date=vehicle.entry_date,
         )
 
         if card is not None:
@@ -54,7 +55,8 @@ class ParkingService:
                 self.cards_repository.update_card(card_id, short_code)
             except DomainError as e:
                 if e.message == "Card already has a short code":
-                    raise DomainError("Card is already associated with a vehicle")
+                    raise DomainError(
+                        "Card is already associated with a vehicle")
             except Exception as e:
                 raise e
 

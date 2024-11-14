@@ -1,3 +1,13 @@
+# Clonar repositorio
+```bash
+git clone git@github.com:AndersonMahecha/smart-parking.git
+```
+
+### Cambiar de rama
+```bash
+git checkout frontend
+```
+
 # Run the frontend
 ### Paso 1:
 Instalar Docker

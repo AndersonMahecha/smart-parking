@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartParking</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pago.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='assets/ico.png') }}" type="image/x-icon">
 </head>
 
@@ -30,11 +31,11 @@
                 <img src="{{ url_for('static', filename='assets/menu/dashboard.png') }}" alt="">
                 <p>Dashboard</p>
             </a>
-            <a href="{{ url_for('ingreso') }}" id="item-left-menu" class="box actual-option">
+            <a href="{{ url_for('ingreso') }}" id="item-left-menu" class="box ">
                 <img src="{{ url_for('static', filename='assets/menu/ingreso.png') }}" alt="">
                 <p>Ingreso de vehiculos</p>
             </a>
-            <a href="{{ url_for('salida') }}" id="item-left-menu" class="box">
+            <a href="{{ url_for('salida') }}" id="item-left-menu" class="box actual-option">
                 <img src="{{ url_for('static', filename='assets/menu/salida.png') }}" alt="">
                 <p>Salida de vehiculos</p>
             </a>
@@ -72,6 +73,6 @@
     </footer>
 </body>
 
-<script src="{{ url_for('static', filename='js/ingreso.js') }}"></script>
+<script src="{{ url_for('static', filename='js/pago.js') }}"></script>
 
 </html>

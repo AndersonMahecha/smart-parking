@@ -19,6 +19,7 @@ from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
+CORS(app)  # Habilitar CORS para todas las rutas
 
 userRepository = UserRepository(db_session)
 vehicleRepository = VehicleRepository(db_session)
@@ -35,6 +36,7 @@ parkingService = ParkingService(
 init_db()
 
 clients = []
+
 
 @app.route('/')
 def index():
@@ -120,7 +122,8 @@ def register_entry():
         return jsonify({"message": f"Missing required field: {e}"}), 400
 
     try:
-        vehicle = parkingService.register_vehicle_entry(vehicle_request, card_id)
+        vehicle = parkingService.register_vehicle_entry(
+            vehicle_request, card_id)
     except DomainError as e:
         return jsonify({"message": str(e)}), 400
 
