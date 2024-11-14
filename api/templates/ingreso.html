@@ -50,20 +50,26 @@
         <section class="box" id="section-content"> <!-- Contenido -->
             <h1>Ingreso de vehículos</h1>
             <div id="formulario">
-                <form action="">
+                <form id="vehiculo-form" action="">
                     <!-- fecha y hora -->
                     <label for="fecha">Fecha</label>
-                    <input type="date" id="fecha" name="fecha" required>
+                    <input type="date" name="fecha" id="fecha" class="input-required" required readonly>
                     <label for="hora">Hora</label>
-                    <input type="time" id="hora" name="hora" required>
-                    <!-- placa y tipo -->
-                    <label for="placa">Placa</label>
-                    <input type="text" id="placa" name="placa" required>
-                    <label for="tipo">Tipo de vehículo</label>
+                    <input type="time" name="hora" id="hora" class="input-required" required readonly>
+                    <!-- Tipo de vehiculo -->
+                    <label for="tipo">Tipo de vehículo <span style="color: rgb(150, 0, 0);">*</span></label>
                     <select name="tipo" id="tipo" required>
-                        <option value="moto">Moto</option>
+                        <option value="" disabled selected>---- Seleccione ----</option>
                         <option value="carro">Carro</option>
+                        <option value="moto">Moto</option>
                     </select>
+                    <!-- placa -->
+                    <label for="placa">Placa <span style="color: rgb(150, 0, 0);">*</span></label>
+                    <input type="text" id="placa" name="placa" maxlength="6" style="text-transform:uppercase;" required
+                        disabled>
+                    <div id="placa-preview" class="placa-preview">
+                        <span id="placa-text">--- ---</span>
+                    </div>
                     <button type="submit">Ingresar</button>
                 </form>
             </div>
