@@ -5,6 +5,7 @@ services:
       MYSQL_ROOT_PASSWORD: "password"
       MYSQL_ROOT_HOST: "%"
       MYSQL_DATABASE: "smart-parking"
+      TZ: "America/Bogota"
     image: "mysql:9.0.1"
     networks:
       - default

@@ -106,6 +106,30 @@ def register_entry():
     return jsonify(serialized_vehicle), 201
 
 
+@app.route("/api/v1/exits", methods=["POST"])
+def register_exit():
+    try:
+        vehicle_request = VehicleSchema().load(request.json)
+        vehicle_image = request.files.get("vehicle_image")
+        card_id = request.args.get("card_id")
+    except ValidationError as e:
+        return jsonify({"message": str(e)}), 400
+    except DomainError as e:
+        return jsonify({"message": str(e)}), 400
+    except KeyError as e:
+        return jsonify({"message": f"Missing required field: {e}"}), 400
+
+    try:
+        vehicle = parkingService.register_vehicle_exit(vehicle_request, card_id)
+    except DomainError as e:
+        return jsonify({"message": str(e)}), 400
+
+    serialized_vehicle = VehicleSchema().dump(vehicle)
+
+    notify_clients()
+    return jsonify(serialized_vehicle), 201
+
+
 @app.route("/api/v1/system/status", methods=["GET"])
 def get_system_status():
     return jsonify({"vehicles": 120, "parking_slots": 10}), 200
@@ -117,7 +141,7 @@ def shutdown_session(exception=None):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, allow_unsafe_werkzeug=True)
+    app.run(host="0.0.0.0", port=8080)
 
 
 def random_plate():

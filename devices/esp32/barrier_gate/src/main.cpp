@@ -10,7 +10,6 @@
 #include <WiFiMulti.h>
 #include <HTTPClient.h>
 #include <WebSocketsClient.h>
-#include <SocketIOclient.h>
 
 #define SERVO_PIN 13
 #define BUTTON_PIN_A 14
@@ -55,13 +54,14 @@ void printlnCentered(String text);
 void welcomeMessage();
 void showAllData();
 void startCloseTimmer();
-void socketIOEvent(socketIOmessageType_t type, uint8_t *payload, size_t length);
+void webSocketEvent(WStype_t type, uint8_t *payload, size_t length);
+
 
 Servo servo;
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 MFRC522 rfid = MFRC522(SS_PIN, RST_PIN);
 WiFiMulti WiFiMulti;
-SocketIOclient socketIO;
+WebSocketsClient webSocket;
 
 void setup()
 
@@ -88,12 +88,16 @@ void setup()
   String ip = WiFi.localIP().toString();
   Serial.printf("[SETUP] WiFi Connected %s\n", ip.c_str());
 
-  socketIO.configureEIOping(true);
-  // server address, port and URL
-  socketIO.begin("192.168.10.25", 8080, "/socket.io/?EIO=4");
+  webSocket.begin("192.168.10.16", 8080, "");
 
   // event handler
-  socketIO.onEvent(socketIOEvent);
+  webSocket.onEvent(webSocketEvent);
+
+  // use HTTP Basic Authorization this is optional remove if not needed
+  webSocket.setAuthorization("user", "Password");
+
+  // try ever 5000 again if connection has failed
+  webSocket.setReconnectInterval(5000);
 
   SPI.begin();
   rfid.PCD_Init();
@@ -124,88 +128,88 @@ void setup()
 
 void loop()
 {
-  socketIO.loop();
+  webSocket.loop();
 
-  /*  if (digitalRead(BUTTON_PIN_A) == DETECTION_VALUE || digitalRead(BUTTON_PIN_B) == DETECTION_VALUE)
-   {
-     if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial())
-     {
-       if (currentUsedSpots >= MAX_PARKING_SPOTS)
-       {
-         return;
-       }
-       // store the UID in a char* buffer
-       char uidString[10];
-       for (byte i = 0; i < rfid.uid.size; i++)
-       {
-         sprintf(uidString + 2 * i, "%02X", rfid.uid.uidByte[i]);
-       }
+  if (digitalRead(BUTTON_PIN_A) == DETECTION_VALUE || digitalRead(BUTTON_PIN_B) == DETECTION_VALUE)
+  {
+    if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial())
+    {
+      if (currentUsedSpots >= MAX_PARKING_SPOTS)
+      {
+        return;
+      }
+      // store the UID in a char* buffer
+      char uidString[10];
+      for (byte i = 0; i < rfid.uid.size; i++)
+      {
+        sprintf(uidString + 2 * i, "%02X", rfid.uid.uidByte[i]);
+      }
 
-       // check if the UID is already in the array
-       bool uidExists = false;
-       for (int i = 0; i < currentUsedSpots; i++)
-       {
-         Serial.println("Comparing UID");
-         Serial.println(uidString);
-         Serial.println(rfidTags[i]);
-         if (strcmp(rfidTags[i], uidString) == 0)
-         {
-           Serial.println("UID already in array");
-           uidExists = true;
-         }
-       }
+      // check if the UID is already in the array
+      bool uidExists = false;
+      for (int i = 0; i < currentUsedSpots; i++)
+      {
+        Serial.println("Comparing UID");
+        Serial.println(uidString);
+        Serial.println(rfidTags[i]);
+        if (strcmp(rfidTags[i], uidString) == 0)
+        {
+          Serial.println("UID already in array");
+          uidExists = true;
+        }
+      }
 
-       if (!uidExists)
-       {
-         Serial.println("UID added to array");
-         Serial.println(uidString);
-         rfidTags[currentUsedSpots] = strdup(uidString);
-         currentUsedSpots++;
-         requireUpdate = true;
-         targetAngle = OPEN_ANGLE;
-         startCloseTimmer();
-       }
+      if (!uidExists)
+      {
+        Serial.println("UID added to array");
+        Serial.println(uidString);
+        rfidTags[currentUsedSpots] = strdup(uidString);
+        currentUsedSpots++;
+        requireUpdate = true;
+        targetAngle = OPEN_ANGLE;
+        startCloseTimmer();
+      }
 
-       rfid.PICC_HaltA();
-       rfid.PCD_StopCrypto1();
-     }
-   }
-   else
-   {
-     delay(10);
-   }
+      rfid.PICC_HaltA();
+      rfid.PCD_StopCrypto1();
+    }
+  }
+  else
+  {
+    delay(10);
+  }
 
-   if (currentAngle < targetAngle)
-   {
-     currentAngle++;
-     barrierState = BARRIER_CLOSING;
-   }
-   else if (currentAngle > targetAngle)
-   {
-     currentAngle--;
-     barrierState = BARRIER_OPENING;
-   }
-   else
-   {
-     if (!requireUpdate)
-     {
-       if (targetAngle == CLOSE_ANGLE)
-       {
-         barrierState = BARRIER_CLOSED;
-       }
-       else
-       {
-         barrierState = BARRIER_OPENED;
-       }
-       requireUpdate = true;
-     }
-   }
-   servo.write(currentAngle);
-   if (requireUpdate)
-   {
-     requireUpdate = false;
-     showAllData();
-   } */
+  if (currentAngle < targetAngle)
+  {
+    currentAngle++;
+    barrierState = BARRIER_CLOSING;
+  }
+  else if (currentAngle > targetAngle)
+  {
+    currentAngle--;
+    barrierState = BARRIER_OPENING;
+  }
+  else
+  {
+    if (!requireUpdate)
+    {
+      if (targetAngle == CLOSE_ANGLE)
+      {
+        barrierState = BARRIER_CLOSED;
+      }
+      else
+      {
+        barrierState = BARRIER_OPENED;
+      }
+      requireUpdate = true;
+    }
+  }
+  servo.write(currentAngle);
+  if (requireUpdate)
+  {
+    requireUpdate = false;
+    showAllData();
+  }
 }
 
 void IRAM_ATTR updateTarget()
@@ -306,38 +310,45 @@ void dump_byte_array(byte *buffer, byte bufferSize)
     Serial.print(buffer[i], HEX);
   }
 }
-void socketIOEvent(socketIOmessageType_t type, uint8_t *payload, size_t length)
+
+void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
 {
+
   switch (type)
   {
-  case sIOtype_DISCONNECT:
-    Serial.printf("[IOc] Disconnected!\n");
-    dump_byte_array(payload, length);
+  case WStype_DISCONNECTED:
+    Serial.printf("[WSc] Disconnected!\n");
     break;
-  case sIOtype_CONNECT:
-    Serial.printf("[IOc] Connected to url: %s\n", payload);
+  case WStype_CONNECTED:
+    Serial.printf("[WSc] Connected to url: %s\n", payload);
 
-    // join default namespace (no auto join in Socket.IO V3)
-    socketIO.send(sIOtype_CONNECT, "/");
+    // send message to server when Connected
+    webSocket.sendTXT("Connected");
     break;
-  case sIOtype_EVENT:
-    Serial.printf("[IOc] get event: %s\n", payload);
+  case WStype_TEXT:
+    Serial.printf("[WSc] get text: %s\n", payload);
+
+    // send message to server
+    // webSocket.sendTXT("message here");
     break;
-  case sIOtype_ACK:
-    Serial.printf("[IOc] get ack: %u\n", length);
-    dump_byte_array(payload, length);
-    break;
-  case sIOtype_ERROR:
-    Serial.printf("[IOc] get error: %u\n", length);
-    dump_byte_array(payload, length);
-    break;
-  case sIOtype_BINARY_EVENT:
-    Serial.printf("[IOc] get binary: %u\n", length);
-    dump_byte_array(payload, length);
-    break;
-  case sIOtype_BINARY_ACK:
-    Serial.printf("[IOc] get binary ack: %u\n", length);
-    dump_byte_array(payload, length);
+  case WStype_ERROR:
+  case WStype_FRAGMENT_TEXT_START:
+  case WStype_FRAGMENT_BIN_START:
+  case WStype_FRAGMENT:
+  case WStype_FRAGMENT_FIN:
     break;
   }
+}
+
+void hexdump(const void *mem, uint32_t len, uint8_t cols = 16) {
+	const uint8_t* src = (const uint8_t*) mem;
+	Serial.printf("\n[HEXDUMP] Address: 0x%08X len: 0x%X (%d)", (ptrdiff_t)src, len, len);
+	for(uint32_t i = 0; i < len; i++) {
+		if(i % cols == 0) {
+			Serial.printf("\n[0x%08X] 0x%08X: ", (ptrdiff_t)src, i);
+		}
+		Serial.printf("%02X ", *src);
+		src++;
+	}
+	Serial.printf("\n");
 }
