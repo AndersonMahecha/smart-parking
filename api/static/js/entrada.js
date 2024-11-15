@@ -9,16 +9,16 @@ form.addEventListener('submit', (event) => {
     event.preventDefault(); // Evita el envío del formulario
 
     // Obtener la fecha y hora actuales en la zona horaria de Colombia
-    const date = new Date();
-    const colombiaTime = date.toLocaleString("en-CA", {
-        timeZone: "America/Bogota",
-        hour12: false
-    }).replace(",", "");  // Remueve la coma entre la fecha y la hora
+    // const date = new Date();
+    // const colombiaTime = date.toLocaleString("en-CA", {
+    //     timeZone: "America/Bogota",
+    //     hour12: false
+    // }).replace(",", "");  // Remueve la coma entre la fecha y la hora
 
     const vehicleData = {
         license_plate: event.target.placa.value.toUpperCase(),
         vehicle_type: event.target.tipo.value,
-        entry_date: colombiaTime,  // Fecha en formato "YYYY-MM-DD HH:MM:SS"
+        // entry_date: colombiaTime,  // Fecha en formato "YYYY-MM-DD HH:MM:SS"
     };
 
     // Hacer la solicitud POST usando fetch

@@ -38,7 +38,7 @@ class VehicleSchema(Schema):
     short_code = fields.Str(dump_only=True)
     vehicle_type = fields.Str(
         required=True, validate=OneOf(["car", "motorcycle"]))
-    entry_date = fields.DateTime(required=True) #timestamp
+    entry_date = fields.DateTime(dump_only=True) #timestamp
     parking_slot_id = fields.UUID(dump_only=True)
 
     @post_load

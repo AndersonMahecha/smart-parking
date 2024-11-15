@@ -23,48 +23,26 @@ docker pull mysql:latest
 ### Paso 3:
 Iniciar el contenedor
 ```bash 
-docker run --name mysql -e MYSQL_ROOT_PASSWORD=password -e MYSQL_ROOT_HOST=root -e MYSQL_DATABASE=smart-parking -p 3306:3306 --rm mysql:5.7
+docker-compose up --build -d
 ```
 
 ### Paso 4:
-Acceder a MySQL en el contenedor para configurar el acceso del usuario:
+Dirigirse a `./api`
 
-#### Abra el terminal bash
-```bash
-docker exec -it mysql bash
+Ejecutar
+```bash 
+python -m venv .venv
+source ./.venv/bin/activate
 ```
 
-#### Conéctese al cliente como usuario root:
-```bash
-mysql -u root -p
-```
+### Paso 5: 
+Instalar requirimientos
 
-#### Crear un usuario que pueda conectarse desde la dirección IP del servidor Flask:
-```bash
-CREATE USER 'root'@'%' IDENTIFIED BY 'password';
-GRANT ALL PRIVILEGES ON *.* TO 'root'@'%';
-FLUSH PRIVILEGES;
+```bash 
+pip install -r requirementes.txt
 ```
 
 ### Paso 5:
-Dirigirse a `./api`
-
-#### Instalar pipenv
-```bash
-pip install pipenv
-```
-
-#### Instalar las dependencias especificadas en el Pipfile
-```bash
-pipenv install
-```
-
-### Paso 6:
-Activar el entorno virtual
-```bash
-pipenv shell
-```
-
 Ejecutar `bootstrap.sh`
 ```bash
 ./bootstrap.sh
