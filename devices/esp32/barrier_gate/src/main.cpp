@@ -88,16 +88,13 @@ void setup()
   String ip = WiFi.localIP().toString();
   Serial.printf("[SETUP] WiFi Connected %s\n", ip.c_str());
 
-  webSocket.begin("192.168.10.16", 8080, "");
+  webSocket.begin("192.168.10.25", 3500, "");
 
   // event handler
   webSocket.onEvent(webSocketEvent);
 
-  // use HTTP Basic Authorization this is optional remove if not needed
-  webSocket.setAuthorization("user", "Password");
-
   // try ever 5000 again if connection has failed
-  webSocket.setReconnectInterval(5000);
+  webSocket.setReconnectInterval(1000);
 
   SPI.begin();
   rfid.PCD_Init();

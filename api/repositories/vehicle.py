@@ -98,3 +98,7 @@ class VehicleRepository:
             )
             for vehicle in vehicle_schema
         ]
+
+    def delete_vehicle(self, found_vehicle: VehicleModel):
+        self.db_session.delete(found_vehicle)
+        self.db_session.commit()

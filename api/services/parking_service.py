@@ -1,6 +1,7 @@
 import random
 import string
 
+from api.main import vehicleRepository
 from api.model.exceptions import DomainError
 from api.model.vehicle import Vehicle as VehicleModel
 from api.repositories.card import CardRepository
@@ -55,8 +56,7 @@ class ParkingService:
                 self.cards_repository.update_card(card_id, short_code)
             except DomainError as e:
                 if e.message == "Card already has a short code":
-                    raise DomainError(
-                        "Card is already associated with a vehicle")
+                    raise DomainError("Card is already associated with a vehicle")
             except Exception as e:
                 raise e
 
@@ -67,7 +67,28 @@ class ParkingService:
     def register_vehicle_exit(
         self, vehicle: VehicleModel, card_id: str
     ) -> VehicleModel:
-        pass
+
+        card = None
+        if card_id is not None:
+            card = self.cards_repository.get_by_id(card_id)
+            if card is None:
+                raise DomainError("Card not found")
+            ## TODO get vehicle by card
+
+        found_vehicle = self.vehicle_repository.get_vehicle_by_license_plate(
+            vehicle.license_plate
+        )
+
+        if found_vehicle is None:
+            raise DomainError("Vehicle not found")
+
+        if card is not None:
+            try:
+                self.cards_repository.update_card(card_id, None)
+            except Exception as e:
+                raise e
+
+        self.vehicle_repository.delete_vehicle(found_vehicle)
 
 
 def generate_short_code():
