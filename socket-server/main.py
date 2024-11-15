@@ -1,37 +1,48 @@
-import socket
-import threading
+import asyncio
+import random
+import websockets
+import json
 
 
-def main():
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host = "127.0.0.1"
-    port = 8081
-    server_socket.bind((host, port))
-    server_socket.listen(5)
-    print(f"Server listening on {host}:{port}")
+async def handler(websocket):
+
+    # create periodic task:
+    asyncio.create_task(send(websocket))
 
     while True:
-        client_socket, client_address = server_socket.accept()
-        print(f"Accepted connection from {client_address}")
-        client_handler = threading.Thread(target=handle_client, args=(client_socket,))
-        client_handler.start()
+        try:
+            message = await websocket.recv()
+            print(message)
 
-
-def handle_client(client_socket: socket.socket):
-    while True:
-        data = client_socket.recv(1024)
-        if not data:
-            continue
-        message = data.decode("utf-8")
-        if message == "exit":
+        # client disconnected?
+        except websockets.ConnectionClosedOK:
             break
-        if message == "":
-            continue
-        print(f"Received message: {message}")
-        response = "Server received your message: " + message
-        client_socket.sendall(response.encode("utf-8"))
-    client_socket.close()
+
+
+async def send(websocket):
+    print("new client connected")
+    while True:
+        data = [
+            {"name": "Random Int 1", "number": random.randint(0, 1000)},
+            {"name": "Random Int 2", "number": random.randint(1001, 2000)},
+            {"name": "Random Int 3", "number": random.randint(2001, 3000)},
+        ]
+
+        try:
+            await websocket.send(json.dumps(data))
+
+        # client disconnected?
+        except websockets.ConnectionClosedOK:
+            break
+
+        await asyncio.sleep(0.5)
+    print("client disconnected")
+
+
+async def main():
+    async with websockets.serve(handler, "localhost", 3500):
+        await asyncio.Future()  # run forever
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

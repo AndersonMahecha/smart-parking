@@ -64,6 +64,11 @@ class ParkingService:
 
         return vehicle
 
+    def register_vehicle_exit(
+        self, vehicle: VehicleModel, card_id: str
+    ) -> VehicleModel:
+        pass
+
 
 def generate_short_code():
     return "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
