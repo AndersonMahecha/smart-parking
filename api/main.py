@@ -2,7 +2,7 @@ import random
 import string
 
 import socketio
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from marshmallow import ValidationError
 
 from api.model.exceptions import DomainError
@@ -19,6 +19,7 @@ from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
+CORS(app)  # Habilitar CORS para todas las rutas
 
 userRepository = UserRepository(db_session)
 vehicleRepository = VehicleRepository(db_session)
@@ -35,6 +36,31 @@ parkingService = ParkingService(
 init_db()
 
 clients = []
+
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+@app.route('/ingreso')
+def ingreso():
+    return render_template('ingreso.html')
+
+
+@app.route('/salida')
+def salida():
+    return render_template('salida.html')
+
+
+@app.route('/pago')
+def pago():
+    return render_template('pago.html')
+
+
+@app.route('/visualizacion')
+def visualizacion():
+    return render_template('visualizacion.html')
 
 
 @app.route("/api/v1/health", methods=["GET"])
@@ -96,7 +122,8 @@ def register_entry():
         return jsonify({"message": f"Missing required field: {e}"}), 400
 
     try:
-        vehicle = parkingService.register_vehicle_entry(vehicle_request, card_id)
+        vehicle = parkingService.register_vehicle_entry(
+            vehicle_request, card_id)
     except DomainError as e:
         return jsonify({"message": str(e)}), 400
 

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartParking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='assets/ico.png') }}" type="image/x-icon">
+</head>
+
+<body>
+    <header class="box">
+        <div>
+            <a id="tap-logo" href="">
+                <img id="logo" src="{{ url_for('static', filename='assets/ico.png') }}" alt="SmartParking">
+            </a>
+        </div>
+        <div class="relleno"></div>
+        <div id="tap-user">
+            <a class="box" href=""> <!-- Link acción usuario -->
+                <img src="{{ url_for('static', filename='assets/user.svg') }}" alt=""> <!--logoUsuario-->
+                <p>Administrador</p>
+            </a>
+        </div>
+    </header>
+    <main>
+        <section id="left-menu"> <!-- Menú -->
+            <a href="{{ url_for('index') }}" id="item-left-menu" class="box">
+                <img src="{{ url_for('static', filename='assets/menu/dashboard.png') }}" alt="">
+                <p>Dashboard</p>
+            </a>
+            <a href="{{ url_for('ingreso') }}" id="item-left-menu" class="box actual-option">
+                <img src="{{ url_for('static', filename='assets/menu/ingreso.png') }}" alt="">
+                <p>Ingreso de vehiculos</p>
+            </a>
+            <a href="{{ url_for('salida') }}" id="item-left-menu" class="box">
+                <img src="{{ url_for('static', filename='assets/menu/salida.png') }}" alt="">
+                <p>Salida de vehiculos</p>
+            </a>
+            <a href="{{ url_for('pago') }}" id="item-left-menu" class="box">
+                <img src="{{ url_for('static', filename='assets/menu/pay.png') }}" alt="">
+                <p>Pago</p>
+            </a>
+            <a href="{{ url_for('visualizacion') }}" id="item-left-menu" class="box">
+                <img src="{{ url_for('static', filename='assets/menu/map.png') }}" alt="">
+                <p>Visualización 2D</p>
+            </a>
+        </section> <!-- Menú -->
+        <section class="box" id="section-content"> <!-- Contenido -->
+            <h1>Ingreso de vehículos</h1>
+            <div id="formulario">
+                <form id="vehiculo-form" action="">
+                    <!-- fecha y hora -->
+                    <label for="fecha">Fecha</label>
+                    <input type="date" name="fecha" id="fecha" class="input-required" required readonly>
+                    <label for="hora">Hora</label>
+                    <input type="time" name="hora" id="hora" class="input-required" required readonly>
+                    <!-- Tipo de vehiculo -->
+                    <label for="tipo">Tipo de vehículo <span style="color: rgb(150, 0, 0);">*</span></label>
+                    <select name="tipo" id="tipo" required>
+                        <option value="" disabled selected>---- Seleccione ----</option>
+                        <option value="car">Carro</option>
+                        <option value="motorcycle">Moto</option>
+                    </select>
+                    <!-- placa -->
+                    <label for="placa">Placa <span style="color: rgb(150, 0, 0);">*</span></label>
+                    <input type="text" id="placa" name="placa" minlength="6" maxlength="6"
+                        style="text-transform:uppercase;" required disabled>
+                    <div id="placa-preview" class="placa-preview">
+                        <span id="placa-text">--- ---</span>
+                    </div>
+                    <button type="submit">Ingresar</button>
+                </form>
+            </div>
+            <!-- Pop-up -->
+            <div id="popup" class="popup">
+                <div class="popup-content">
+                    <span id="closeBtn" class="close">&times;</span>
+                    <h2 id="title-message-popup"></h2>
+                    <p id="message-popup"></p>
+                </div>
+            </div>
+        </section> <!-- Contenido -->
+    </main>
+    <footer>
+        <div>
+            <ul>
+                <li>Tatiana Ruiz</li>
+                <li>Anderson Mahecha</li>
+                <li>Victor Cespedes</li>
+                <li>Ricardo Rey</li>
+            </ul>
+        </div>
+        <div>
+            <p>SmartParking © 2024</p>
+        </div>
+        <div id="github" class="box">
+            <a href="git@github.com:reyandres015/frontend-smart-parking.git" target="_blank">
+                <img id="github-icon" src="{{ url_for('static', filename='assets/github-favicon.png') }}" alt="">
+            </a>
+        </div>
+
+    </footer>
+</body>
+
+<script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/entrada.js') }}"></script>
+
+</html>

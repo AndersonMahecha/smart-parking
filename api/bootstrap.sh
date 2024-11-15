@@ -11,5 +11,6 @@ export DB_USER
 export DB_PASSWORD
 export DB_HOST
 export DB_NAME
+export FLASK_DEBUG=1
 
-flask --debug run -h 0.0.0.0 --port 8080
+flask run
