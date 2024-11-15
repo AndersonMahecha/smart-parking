@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartParking</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/pago.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='assets/ico.png') }}" type="image/x-icon">
 </head>
 
@@ -31,7 +30,7 @@
                 <img src="{{ url_for('static', filename='assets/menu/dashboard.png') }}" alt="">
                 <p>Dashboard</p>
             </a>
-            <a href="{{ url_for('ingreso') }}" id="item-left-menu" class="box ">
+            <a href="{{ url_for('ingreso') }}" id="item-left-menu" class="box">
                 <img src="{{ url_for('static', filename='assets/menu/ingreso.png') }}" alt="">
                 <p>Ingreso de vehiculos</p>
             </a>
@@ -50,6 +49,32 @@
         </section> <!-- Menú -->
         <section class="box" id="section-content"> <!-- Contenido -->
             <h1>Salida de vehículos</h1>
+            <div id="formulario">
+                <form id="vehiculo-form" action="">
+                    <!-- fecha y hora -->
+                    <label for="fecha">Fecha</label>
+                    <input type="date" name="fecha" id="fecha" class="input-required" required readonly>
+                    <label for="hora">Hora</label>
+                    <input type="time" name="hora" id="hora" class="input-required" required readonly>
+
+                    <!-- placa -->
+                    <label for="placa">Placa <span style="color: rgb(150, 0, 0);">*</span></label>
+                    <input type="text" id="placa" name="placa" minlength="6" maxlength="6"
+                        style="text-transform:uppercase;" required>
+                    <div id="placa-preview" class="placa-preview">
+                        <span id="placa-text">--- ---</span>
+                    </div>
+                    <button type="submit">Ingresar</button>
+                </form>
+            </div>
+            <!-- Pop-up -->
+            <div id="popup" class="popup">
+                <div class="popup-content">
+                    <span id="closeBtn" class="close">&times;</span>
+                    <h2 id="title-message-popup"></h2>
+                    <p id="message-popup"></p>
+                </div>
+            </div>
         </section> <!-- Contenido -->
     </main>
     <footer>
@@ -73,6 +98,7 @@
     </footer>
 </body>
 
-<script src="{{ url_for('static', filename='js/pago.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script type="module" src="{{ url_for('static', filename='js/salida.js') }}"></script>
 
 </html>

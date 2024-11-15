@@ -4,7 +4,7 @@ export FLASK_APP=./main.py
 
 : "${DB_USER:=root}"
 : "${DB_PASSWORD:=password}"
-: "${DB_HOST:="127.0.0.1:3306"}"
+: "${DB_HOST:="127.0.0.1:33060"}"
 : "${DB_NAME:=smart-parking}"
 
 export DB_USER
