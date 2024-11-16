@@ -1,8 +1,13 @@
+import asyncio
+import os
 import random
 import string
+import sys
 
-import socketio
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from flask import Flask, jsonify, request, render_template
+from flask_cors import CORS
 from marshmallow import ValidationError
 
 from api.model.exceptions import DomainError
@@ -15,9 +20,8 @@ from api.repositories.user import UserRepository
 from api.repositories.vehicle import VehicleRepository
 from api.services.parking_service import ParkingService
 from api.services.user import UserService
-from flask_cors import CORS, cross_origin
-from flask_socketio import SocketIO
 
+loop = asyncio.get_event_loop()
 app = Flask(__name__)
 CORS(app)  # Habilitar CORS para todas las rutas
 
@@ -34,9 +38,6 @@ parkingService = ParkingService(
 )
 
 init_db()
-
-clients = []
-
 
 @app.route('/')
 def index():
@@ -103,9 +104,15 @@ def authenticate_user():
     return jsonify(serialized_user), 200
 
 
-def notify_clients():
-    for client in clients:
-        socketio.emit("update", room=client)
+from websockets.asyncio.client import connect
+
+
+async def notify_clients(data):
+    async with connect("ws://localhost:3500") as websocket:
+        await websocket.send("broadcast")
+        message = await websocket.recv()
+        if message != "notified":
+            print("error on notification")
 
 
 @app.route("/api/v1/entries", methods=["POST"])
@@ -129,7 +136,7 @@ def register_entry():
 
     serialized_vehicle = VehicleSchema().dump(vehicle)
 
-    notify_clients()
+    loop.run_until_complete(notify_clients("entry"))
     return jsonify(serialized_vehicle), 201
 
 
@@ -153,7 +160,7 @@ def register_exit():
 
     serialized_vehicle = VehicleSchema().dump(vehicle)
 
-    notify_clients()
+    loop.run_until_complete(notify_clients("exit"))
     return jsonify(serialized_vehicle), 201
 
 
