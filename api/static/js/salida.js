@@ -1,4 +1,4 @@
-import { insertMessagePopUp, validatePlaca } from './main.js';
+import { insertMessagePopUp } from './main.js';
 
 const form = document.getElementById('vehiculo-form');
 const popup = document.getElementById('popup');
@@ -8,17 +8,9 @@ const popup = document.getElementById('popup');
 form.addEventListener('submit', (event) => {
     event.preventDefault(); // Evita el envío del formulario
 
-    // Obtener la fecha y hora actuales en la zona horaria de Colombia
-    const date = new Date();
-    const colombiaTime = date.toLocaleString("en-CA", {
-        timeZone: "America/Bogota",
-        hour12: false
-    }).replace(",", "");  // Remueve la coma entre la fecha y la hora
-
     const vehicleData = {
         license_plate: event.target.placa.value.toUpperCase(),
-        vehicle_type: event.target.tipo.value,
-        entry_date: colombiaTime,  // Fecha en formato "YYYY-MM-DD HH:MM:SS"
+        vehicle_type: "unknown",
     };
 
     // Hacer la solicitud POST usando fetch
@@ -44,8 +36,4 @@ form.addEventListener('submit', (event) => {
         .catch(error => {
             console.error("Error:", error);
         });
-
-    if (!validatePlaca()) {
-        alert('El formato de la placa es incorrecto.');
-    }
 });
