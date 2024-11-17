@@ -14,6 +14,7 @@
 #define SERVO_PIN 13
 #define BUTTON_PIN_A 14
 #define BUTTON_PIN_B 12
+#define ENTRANCE_PIN BUTTON_PIN_A
 #define SS_PIN 4
 #define RST_PIN 2
 
@@ -55,7 +56,6 @@ void welcomeMessage();
 void showAllData();
 void startCloseTimmer();
 void webSocketEvent(WStype_t type, uint8_t *payload, size_t length);
-
 
 Servo servo;
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
@@ -127,7 +127,7 @@ void loop()
 {
   webSocket.loop();
 
-  if (digitalRead(BUTTON_PIN_A) == DETECTION_VALUE || digitalRead(BUTTON_PIN_B) == DETECTION_VALUE)
+  if (barrierState == BARRIER_CLOSED && digitalRead(ENTRANCE_PIN) == DETECTION_VALUE)
   {
     if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial())
     {
@@ -211,10 +211,20 @@ void loop()
 
 void IRAM_ATTR updateTarget()
 {
-  if (digitalRead(BUTTON_PIN_A) == NO_DETECTION_VALUE && digitalRead(BUTTON_PIN_B) == NO_DETECTION_VALUE)
+  if (digitalRead(BUTTON_PIN_A) == NO_DETECTION_VALUE &&
+      digitalRead(BUTTON_PIN_B) == NO_DETECTION_VALUE)
   {
     startCloseTimmer();
   }
+
+  if ((digitalRead(BUTTON_PIN_A) == DETECTION_VALUE ||
+       digitalRead(BUTTON_PIN_B) == DETECTION_VALUE) &&
+      barrierState == BARRIER_CLOSING)
+  {
+    timerStop(closeTimmer);
+    targetAngle = OPEN_ANGLE;
+  }
+
   requireUpdate = true;
 }
 
@@ -337,15 +347,18 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
   }
 }
 
-void hexdump(const void *mem, uint32_t len, uint8_t cols = 16) {
-	const uint8_t* src = (const uint8_t*) mem;
-	Serial.printf("\n[HEXDUMP] Address: 0x%08X len: 0x%X (%d)", (ptrdiff_t)src, len, len);
-	for(uint32_t i = 0; i < len; i++) {
-		if(i % cols == 0) {
-			Serial.printf("\n[0x%08X] 0x%08X: ", (ptrdiff_t)src, i);
-		}
-		Serial.printf("%02X ", *src);
-		src++;
-	}
-	Serial.printf("\n");
+void hexdump(const void *mem, uint32_t len, uint8_t cols = 16)
+{
+  const uint8_t *src = (const uint8_t *)mem;
+  Serial.printf("\n[HEXDUMP] Address: 0x%08X len: 0x%X (%d)", (ptrdiff_t)src, len, len);
+  for (uint32_t i = 0; i < len; i++)
+  {
+    if (i % cols == 0)
+    {
+      Serial.printf("\n[0x%08X] 0x%08X: ", (ptrdiff_t)src, i);
+    }
+    Serial.printf("%02X ", *src);
+    src++;
+  }
+  Serial.printf("\n");
 }
