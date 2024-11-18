@@ -23,6 +23,21 @@
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
+// definicion de tipos de mensaje
+#define MESSAGE_TYPE_STATUS 0
+#define MESSAGE_TYPE_COMMAND 1
+#define MESSAGE_TYPE_RESPONSE 2
+#define MESSAGE_TYPE_ERROR 3
+#define MESSAGE_TYPE_ENTRY 4
+#define MESSAGE_TYPE_EXIT 5
+
+// definicion de tipos de dispositivo
+#define DEVICE_TYPE_BARRIER 0
+#define DEVICE_TYPE_SENSOR 1
+
+#define DEVICE_TYPE DEVICE_TYPE_BARRIER
+#define DEVICE_DEFAULT_MESSAGE_TYPE MESSAGE_TYPE_ENTRY
+
 #define BARRIER_CLOSED 0
 #define BARRIER_OPENED 1
 #define BARRIER_CLOSING 2
@@ -30,22 +45,18 @@
 
 #define WAIT_TIME 5 // in seconds to close the barrier
 
-#define MAX_PARKING_SPOTS 6
-
 #define DETECTION_VALUE HIGH
 #define NO_DETECTION_VALUE LOW
 
 #define ssid "FamiliaMahechaSalamanca"
 #define password "Nirvana77"
-#define websocket_server "http://192.168.10.25:8080"
 
 int targetAngle = 0;
 int currentAngle = 0;
 bool requireUpdate = false;
 int barrierState;
 int currentUsedSpots = 0;
-
-char **rfidTags = new char *[MAX_PARKING_SPOTS];
+int MAX_PARKING_SPOTS = 0;
 
 hw_timer_t *closeTimmer = NULL;
 
@@ -56,6 +67,9 @@ void welcomeMessage();
 void showAllData();
 void startCloseTimmer();
 void webSocketEvent(WStype_t type, uint8_t *payload, size_t length);
+void webSocketSendData(char *data);
+void buildMessage(char *uid, int messageType);
+void processResponse(uint8_t *payload, size_t length);
 
 Servo servo;
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
@@ -131,10 +145,6 @@ void loop()
   {
     if (rfid.PICC_IsNewCardPresent() && rfid.PICC_ReadCardSerial())
     {
-      if (currentUsedSpots >= MAX_PARKING_SPOTS)
-      {
-        return;
-      }
       // store the UID in a char* buffer
       char uidString[10];
       for (byte i = 0; i < rfid.uid.size; i++)
@@ -142,30 +152,7 @@ void loop()
         sprintf(uidString + 2 * i, "%02X", rfid.uid.uidByte[i]);
       }
 
-      // check if the UID is already in the array
-      bool uidExists = false;
-      for (int i = 0; i < currentUsedSpots; i++)
-      {
-        Serial.println("Comparing UID");
-        Serial.println(uidString);
-        Serial.println(rfidTags[i]);
-        if (strcmp(rfidTags[i], uidString) == 0)
-        {
-          Serial.println("UID already in array");
-          uidExists = true;
-        }
-      }
-
-      if (!uidExists)
-      {
-        Serial.println("UID added to array");
-        Serial.println(uidString);
-        rfidTags[currentUsedSpots] = strdup(uidString);
-        currentUsedSpots++;
-        requireUpdate = true;
-        targetAngle = OPEN_ANGLE;
-        startCloseTimmer();
-      }
+      buildMessage(uidString, DEVICE_DEFAULT_MESSAGE_TYPE);
 
       rfid.PICC_HaltA();
       rfid.PCD_StopCrypto1();
@@ -333,15 +320,16 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
     webSocket.sendTXT("Connected");
     break;
   case WStype_TEXT:
-    Serial.printf("[WSc] get text: %s\n", payload);
-
-    // send message to server
-    // webSocket.sendTXT("message here");
+    processResponse(payload, length);
     break;
   case WStype_ERROR:
+    break;
   case WStype_FRAGMENT_TEXT_START:
+    break;
   case WStype_FRAGMENT_BIN_START:
+    break;
   case WStype_FRAGMENT:
+    break;
   case WStype_FRAGMENT_FIN:
     break;
   }
@@ -361,4 +349,46 @@ void hexdump(const void *mem, uint32_t len, uint8_t cols = 16)
     src++;
   }
   Serial.printf("\n");
+}
+
+// Definicion de protocolo de comunicacion
+// 13 bytes de longitud
+// 1 byte para el tipo de mensaje
+// 1 byte para el tipo de dispositivo
+// 1 byte dividido en 4 bits para el estado de la barrera y 4 bits para el estado de los sensores
+// 10 bytes para el UID de la tarjeta
+
+void buildMessage(char *uid, int messageType)
+{
+  u8_t message[13];
+  message[0] = messageType;
+  message[1] = DEVICE_TYPE;
+  message[2] = barrierState << 4 | digitalRead(ENTRANCE_PIN) << 3 | digitalRead(ENTRANCE_PIN);
+  for (int i = 0; i < 10; i++)
+  {
+    message[i + 3] = uid[i];
+  }
+  hexdump(message, 13);
+  webSocket.sendBIN(message, 13);
+}
+
+// 1 byte es el message_type
+// 2 byte es el resultado 0 o 1
+// 3 byte es maximo de vehiculos
+// 4 byte es el numero de vehiculos
+// 5 byte el numero de UIDs
+// 6 byte en adelante son los UIDs de 10 bytes
+void processResponse(uint8_t *payload, size_t length)
+{
+  if (payload[0] == MESSAGE_TYPE_RESPONSE)
+  {
+    MAX_PARKING_SPOTS = payload[2];
+    currentUsedSpots = payload[3];
+    requireUpdate = true;
+    if (payload[1] == 1)
+    {
+      targetAngle = OPEN_ANGLE;
+    }
+    showAllData();
+  }
 }
