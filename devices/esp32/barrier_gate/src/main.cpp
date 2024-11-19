@@ -48,8 +48,8 @@
 #define DETECTION_VALUE HIGH
 #define NO_DETECTION_VALUE LOW
 
-#define ssid "FamiliaMahechaSalamanca"
-#define password "Nirvana77"
+#define ssid "parqueadero"
+#define password "parqueadero123"
 
 int targetAngle = 0;
 int currentAngle = 0;
@@ -102,7 +102,7 @@ void setup()
   String ip = WiFi.localIP().toString();
   Serial.printf("[SETUP] WiFi Connected %s\n", ip.c_str());
 
-  webSocket.begin("192.168.10.25", 3500, "");
+  webSocket.begin("192.168.137.9", 3500, "");
 
   // event handler
   webSocket.onEvent(webSocketEvent);

@@ -20,8 +20,8 @@
 #define SENSE_UMBRAL 2000
 #define SENSE_COUNT 4
 
-#define ssid "FamiliaMahechaSalamanca"
-#define password "Nirvana77"
+#define ssid "parqueadero"
+#define password "parqueadero123"
 
 void webSocketEvent(WStype_t type, uint8_t *payload, size_t length);
 
@@ -64,7 +64,7 @@ void setup()
   String ip = WiFi.localIP().toString();
   Serial.printf("[SETUP] WiFi Connected %s\n", ip.c_str());
 
-  webSocket.begin("192.168.10.27", 3500, "");
+  webSocket.begin("192.168.137.9", 3500, "");
 
   // event handler
   webSocket.onEvent(webSocketEvent);
