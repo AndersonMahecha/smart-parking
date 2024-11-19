@@ -10,7 +10,7 @@ class Parking(object):
     def __init__(self):
         self.cards_id = []
         self.current_vehicles_count = 0
-        self.max_vehicles = 6
+        self.max_vehicles = 4
         self.is_occupied_slots = [False for _ in range(self.max_vehicles)]
 
     def add_vehicle(self, card) -> bool:
@@ -91,10 +91,13 @@ def process_message(message: bytes) -> str | None:
         notify_browsers()
         return response
     if message_type == _MESSAGE_TYPE_STATUS:
-        for idx, status in enumerate(parking.is_occupied_slots):
+        copy = [status for status in parking.is_occupied_slots]
+        for idx, status in enumerate(message[2:6]):
             occupied = status == 0
             parking.is_occupied_slots[idx] = occupied
-        notify_browsers()
+
+        if copy != parking.is_occupied_slots:
+            notify_browsers()
         return None
 
 
@@ -149,6 +152,9 @@ async def handler(websocket):
             print(f"Client {client_id} disconnected")
             clients.remove(client)
             return
+        except websockets.exceptions.ConnectionClosedError:
+            print(f"Client {client_id} disconnected")
+            clients.remove(client)
 
 
 async def websocket_handler():
