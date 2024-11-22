@@ -3,9 +3,7 @@ const inputTime = document.getElementById('hora');
 const placaInput = document.getElementById('placa');
 const placaText = document.getElementById('placa-text');
 const tipoSelect = document.getElementById('tipo');
-const form = document.getElementById('vehiculo-form');
 
-const popup = document.getElementById('popup');
 const title_message = document.getElementById('title-message-popup');
 const message_popup = document.getElementById('message-popup');
 
@@ -49,16 +47,33 @@ document.addEventListener('DOMContentLoaded', (event) => {
         document.getElementById('popup').style.display = 'none';
     });
 
-    // Habilitar el campo de entrada de la placa al seleccionar un tipo de vehículo
-    tipoSelect.addEventListener('change', (event) => {
-        placaInput.value = '';
-        placaText.textContent = '--- ---';
-        if (tipoSelect.value) {
-            placaInput.disabled = false;
-        } else {
-            placaInput.disabled = true;
+    // Evento para validar la placa a medida que se escribe
+    placaInput.addEventListener('input', (event) => {
+
+        // Eliminar caracteres no permitidos y agregar espacio
+        let value = placaInput.value.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+        if (value.length > 3) {
+            value = value.slice(0, 3) + '  ' + value.slice(3);
+        }
+
+        if (validatePlaca()) {
+            // Actualizar el texto de la placa
+            placaText.textContent = value;
         }
     });
+
+    // Habilitar el campo de entrada de la placa al seleccionar un tipo de vehículo
+    if (tipoSelect) {
+        tipoSelect.addEventListener('change', (event) => {
+            placaInput.value = '';
+            placaText.textContent = '--- ---';
+            if (tipoSelect.value) {
+                placaInput.disabled = false;
+            } else {
+                placaInput.disabled = true;
+            }
+        });
+    }
 });
 
 export function insertMessagePopUp(title, message) {
@@ -116,8 +131,10 @@ export function validatePlaca() {
     } else {
         if (placa.length <= 3) {
             isValid = /^[A-Z]{0,3}$/.test(placa);
+        } else if (placa.length <= 5) {
+            isValid = /^[A-Z]{3}[0-9]{1,2}$/.test(placa);
         } else {
-            isValid = /^[A-Z]{3}[A-Z0-9]{0,3}$/.test(placa);
+            isValid = /^[A-Z]{3}[0-9]{2}[A-Z0-9]$/.test(placa);
         }
     }
     if (!isValid) {
