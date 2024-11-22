@@ -1,12 +1,14 @@
 import random
 import string
+from datetime import datetime
 
-from api.main import vehicleRepository
 from api.model.exceptions import DomainError
 from api.model.vehicle import Vehicle as VehicleModel
 from api.repositories.card import CardRepository
 from api.repositories.parking_slot import ParkingSlotRepository
 from api.repositories.vehicle import VehicleRepository
+
+_cost_per_minute = 90
 
 
 class ParkingService:
@@ -64,9 +66,7 @@ class ParkingService:
 
         return vehicle
 
-    def register_vehicle_exit(
-        self, vehicle: VehicleModel, card_id: str
-    ) -> VehicleModel:
+    def register_vehicle_exit(self, license_plate, card_id: str) -> VehicleModel:
 
         card = None
         if card_id is not None:
@@ -76,11 +76,14 @@ class ParkingService:
             ## TODO get vehicle by card
 
         found_vehicle = self.vehicle_repository.get_vehicle_by_license_plate(
-            vehicle.license_plate
+            license_plate
         )
 
         if found_vehicle is None:
             raise DomainError("Vehicle not found")
+
+        if found_vehicle.payment_date is None:
+            raise DomainError("Vehicle has not paid")
 
         if card is not None:
             try:
@@ -88,7 +91,57 @@ class ParkingService:
             except Exception as e:
                 raise e
 
-        self.vehicle_repository.delete_vehicle(found_vehicle)
+        found_vehicle.has_exited = True
+
+        self.vehicle_repository.update_vehicle(found_vehicle)
+        return found_vehicle
+
+    def slots_count(self):
+        parking_slots = self.parking_slots_repository.get_all_parking_slots()
+        return len(parking_slots)
+
+    def vehicles_count(self):
+        vehicles = self.vehicle_repository.get_all_vehicles()
+
+        return len([vehicle for vehicle in vehicles if vehicle.has_exited is False])
+
+    def get_total_cost(self, short_code, card_id, license_plate):
+        vehicle = None
+        if card_id is not None:
+            card = self.cards_repository.get_by_id(card_id)
+            if card is None:
+                raise DomainError("Card not found")
+            short_code = card.short_code
+        if short_code is not None:
+            vehicle = self.vehicle_repository.get_vehicle_by_short_code(short_code)
+
+        if license_plate is not None:
+            vehicle = self.vehicle_repository.get_vehicle_by_license_plate(
+                license_plate
+            )
+
+        if vehicle is None:
+            raise DomainError("Vehicle not found")
+
+        ## calculate total time
+        total_time = datetime.now() - vehicle.entry_date
+        total_time_in_minutes = total_time.total_seconds() / 60
+
+        if total_time_in_minutes < 0:
+            total_time_in_minutes = 1
+
+        total_cost = total_time_in_minutes * _cost_per_minute
+
+        return vehicle, datetime.now(), total_time_in_minutes, total_cost
+
+    def pay_parking(self, vehicle_id):
+        vehicle = self.vehicle_repository.get_vehicle_by_id(vehicle_id)
+        if vehicle is None:
+            raise DomainError("Vehicle not found")
+
+        vehicle.payment_date = datetime.now()
+        self.vehicle_repository.update_vehicle(vehicle)
+        return vehicle
 
 
 def generate_short_code():

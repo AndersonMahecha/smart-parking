@@ -39,29 +39,37 @@ parkingService = ParkingService(
 
 init_db()
 
-@app.route('/')
+
+def get_optional_field(field_name):
+    try:
+        return request.json[field_name]
+    except KeyError:
+        return None
+
+
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html")
 
 
-@app.route('/ingreso')
+@app.route("/ingreso")
 def ingreso():
-    return render_template('ingreso.html')
+    return render_template("ingreso.html")
 
 
-@app.route('/salida')
+@app.route("/salida")
 def salida():
-    return render_template('salida.html')
+    return render_template("salida.html")
 
 
-@app.route('/pago')
+@app.route("/pago")
 def pago():
-    return render_template('pago.html')
+    return render_template("pago.html")
 
 
-@app.route('/visualizacion')
+@app.route("/visualizacion")
 def visualizacion():
-    return render_template('visualizacion.html')
+    return render_template("visualizacion.html")
 
 
 @app.route("/api/v1/health", methods=["GET"])
@@ -108,11 +116,14 @@ from websockets.asyncio.client import connect
 
 
 async def notify_clients(data):
-    async with connect("ws://localhost:3500") as websocket:
-        await websocket.send("broadcast")
-        message = await websocket.recv()
-        if message != "notified":
-            print("error on notification")
+    try:
+        async with connect("ws://localhost:3500") as websocket:
+            await websocket.send("broadcast")
+            message = await websocket.recv()
+            if message != "notified":
+                print("error on notification")
+    except Exception as e:
+        print(f"Error on notification: {e}")
 
 
 @app.route("/api/v1/entries", methods=["POST"])
@@ -129,8 +140,7 @@ def register_entry():
         return jsonify({"message": f"Missing required field: {e}"}), 400
 
     try:
-        vehicle = parkingService.register_vehicle_entry(
-            vehicle_request, card_id)
+        vehicle = parkingService.register_vehicle_entry(vehicle_request, card_id)
     except DomainError as e:
         return jsonify({"message": str(e)}), 400
 
@@ -143,7 +153,7 @@ def register_entry():
 @app.route("/api/v1/exits", methods=["POST"])
 def register_exit():
     try:
-        vehicle_request = VehicleSchema().load(request.json)
+        license_plate = get_optional_field("license_plate")
         vehicle_image = request.files.get("vehicle_image")
         card_id = request.args.get("card_id")
     except ValidationError as e:
@@ -154,7 +164,7 @@ def register_exit():
         return jsonify({"message": f"Missing required field: {e}"}), 400
 
     try:
-        vehicle = parkingService.register_vehicle_exit(vehicle_request, card_id)
+        vehicle = parkingService.register_vehicle_exit(license_plate, card_id)
     except DomainError as e:
         return jsonify({"message": str(e)}), 400
 
@@ -162,6 +172,62 @@ def register_exit():
 
     loop.run_until_complete(notify_clients("exit"))
     return jsonify(serialized_vehicle), 201
+
+
+@app.route("/api/v1/parking/status", methods=["GET"])
+def get_parking_status():
+    slots_count = parkingService.slots_count()
+    vehicles_count = parkingService.vehicles_count()
+    return jsonify({"slots_count": slots_count, "vehicles_count": vehicles_count}), 200
+
+
+@app.route("/api/v1/parking/pay", methods=["POST"])
+def pay_parking():
+    try:
+        vehicle_id = request.json["vehicle_id"]
+    except KeyError as e:
+        return jsonify({"message": f"Missing required field: {e}"}), 400
+    try:
+        vehicle = parkingService.pay_parking(vehicle_id)
+    except DomainError as e:
+        return jsonify({"message": str(e)}), 400
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+    serialized_vehicle = VehicleSchema().dump(vehicle)
+    return jsonify(serialized_vehicle), 200
+
+
+@app.route("/api/v1/parking/pay", methods=["GET"])
+def get_payment_info():
+    card_id = get_optional_field("card_id")
+    license_plate = get_optional_field("license_plate")
+    short_code = get_optional_field("short_code")
+
+    try:
+        (
+            vehicle,
+            current_time,
+            total_minutes,
+            total_cost,
+        ) = parkingService.get_total_cost(short_code, card_id, license_plate)
+    except DomainError as e:
+        return jsonify({"message": str(e)}), 400
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+    serialized_vehicle = VehicleSchema().dump(vehicle)
+    return (
+        jsonify(
+            {
+                "vehicle": serialized_vehicle,
+                "current_time": current_time,
+                "total_minutes": total_minutes,
+                "total_cost": total_cost,
+            }
+        ),
+        200,
+    )
 
 
 @app.route("/api/v1/system/status", methods=["GET"])

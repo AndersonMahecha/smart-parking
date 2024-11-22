@@ -41,6 +41,8 @@ class VehicleRepository:
             vehicle_type=vehicle_schema.vehicle_type,
             entry_date=vehicle_schema.entry_date,
             parking_slot_id=vehicle_schema.parking_slot_id,
+            payment_date=vehicle_schema.payment_date,
+            has_exited=vehicle_schema.has_exited,
         )
 
     def get_vehicle_by_short_code(self, short_code: str) -> VehicleModel | None:
@@ -60,6 +62,8 @@ class VehicleRepository:
             vehicle_type=vehicle_schema.vehicle_type,
             entry_date=vehicle_schema.entry_date,
             parking_slot_id=vehicle_schema.parking_slot_id,
+            payment_date=vehicle_schema.payment_date,
+            has_exited=vehicle_schema.has_exited,
         )
 
     # joins vehicle and parking slot tables to get the vehicle by parking slot number
@@ -95,6 +99,8 @@ class VehicleRepository:
                 vehicle_type=vehicle.vehicle_type,
                 entry_date=vehicle.entry_date,
                 parking_slot_id=vehicle.parking_slot_id,
+                payment_date=vehicle.payment_date,
+                has_exited=vehicle.has_exited,
             )
             for vehicle in vehicle_schema
         ]
@@ -102,3 +108,37 @@ class VehicleRepository:
     def delete_vehicle(self, found_vehicle: VehicleModel):
         self.db_session.delete(found_vehicle)
         self.db_session.commit()
+
+    def get_vehicle_by_id(self, vehicle_id):
+        vehicle_schema = self.db_session.query(VehicleEntity).get(vehicle_id)
+
+        if vehicle_schema is None:
+            return None
+
+        return VehicleModel(
+            identifier=vehicle_schema.identifier,
+            license_plate=vehicle_schema.license_plate,
+            short_code=vehicle_schema.short_code,
+            vehicle_type=vehicle_schema.vehicle_type,
+            entry_date=vehicle_schema.entry_date,
+            parking_slot_id=vehicle_schema.parking_slot_id,
+            payment_date=vehicle_schema.payment_date,
+            has_exited=vehicle_schema.has_exited,
+        )
+
+    def update_vehicle(self, vehicle: VehicleModel):
+        self.db_session.query(VehicleEntity).filter_by(
+            identifier=vehicle.identifier
+        ).update(
+            {
+                VehicleEntity.license_plate: vehicle.license_plate,
+                VehicleEntity.short_code: vehicle.short_code,
+                VehicleEntity.vehicle_type: vehicle.vehicle_type,
+                VehicleEntity.entry_date: vehicle.entry_date,
+                VehicleEntity.parking_slot_id: vehicle.parking_slot_id,
+                VehicleEntity.payment_date: vehicle.payment_date,
+                VehicleEntity.has_exited: vehicle.has_exited,
+            }
+        )
+        self.db_session.commit()
+        return vehicle

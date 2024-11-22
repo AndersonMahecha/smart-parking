@@ -23,6 +23,8 @@ class Vehicle(object):
         vehicle_type: Optional[VehicleType] = None,
         entry_date: Optional[datetime] = None,
         parking_slot_id: Optional[UUID] = None,
+        payment_date: Optional[datetime] = None,
+        has_exited: Optional[bool] = False,
     ):
         self.identifier = identifier
         self.license_plate = license_plate
@@ -30,16 +32,19 @@ class Vehicle(object):
         self.vehicle_type = vehicle_type
         self.entry_date = entry_date
         self.parking_slot_id = parking_slot_id
+        self.payment_date = payment_date
+        self.has_exited = has_exited
 
 
 class VehicleSchema(Schema):
     identifier = fields.UUID(dump_only=True)
     license_plate = fields.Str(allow_none=True)
     short_code = fields.Str(dump_only=True)
-    vehicle_type = fields.Str(
-        required=True, validate=OneOf(["car", "motorcycle"]))
-    entry_date = fields.DateTime(dump_only=True) #timestamp
+    vehicle_type = fields.Str(required=True, validate=OneOf(["car", "motorcycle"]))
+    entry_date = fields.DateTime(dump_only=True)  # timestamp
     parking_slot_id = fields.UUID(dump_only=True)
+    payment_date = fields.DateTime(dump_only=True)  # timestamp
+    has_exited = fields.Boolean(dump_only=True)
 
     @post_load
     def make_vehicle(self, data, **kwargs):
