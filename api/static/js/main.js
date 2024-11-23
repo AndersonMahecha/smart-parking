@@ -4,8 +4,10 @@ const placaInput = document.getElementById('placa');
 const placaText = document.getElementById('placa-text');
 const tipoSelect = document.getElementById('tipo');
 
+const form = document.getElementById('vehiculo-form');
 const title_message = document.getElementById('title-message-popup');
 const message_popup = document.getElementById('message-popup');
+const button_popup = document.getElementById('button-popup');
 
 document.addEventListener('DOMContentLoaded', (event) => {
     // obtener fecha y hora actuales
@@ -38,14 +40,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
     const closeBtn = document.getElementById('closeBtn');
     const backgroundPopup = document.getElementById('popup');
 
-    // Cerrar el pop-up cuando el usuario haga clic en la 'X'
-    closeBtn.addEventListener('click', function () {
+    function closePopUp() {
         document.getElementById('popup').style.display = 'none';
-    });
+        form.disabled = false;
+    }
 
-    backgroundPopup.addEventListener('click', function () {
-        document.getElementById('popup').style.display = 'none';
-    });
+    // Cerrar el pop-up cuando el usuario haga clic en la 'X'
+    closeBtn.addEventListener('click', closePopUp);
+    backgroundPopup.addEventListener('click', closePopUp);
 
     // Evento para validar la placa a medida que se escribe
     placaInput.addEventListener('input', (event) => {
@@ -64,6 +66,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     // Habilitar el campo de entrada de la placa al seleccionar un tipo de vehículo
     if (tipoSelect) {
+        placaInput.disabled = true;
         tipoSelect.addEventListener('change', (event) => {
             placaInput.value = '';
             placaText.textContent = '--- ---';
@@ -73,36 +76,39 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 placaInput.disabled = true;
             }
         });
+    } else {
+        placaInput.disabled = false;
     }
 });
 
-export function insertMessagePopUp(title, message) {
+export function insertMessagePopUp(title, vehicle, buttonTxt = 'Aceptar') {
     title_message.textContent = title;
 
-    if (typeof message === 'string') {
-        title_message.textContent = title + ': ' + message;
+    if (typeof vehicle === 'string') {
+        title_message.textContent = title + ': ' + vehicle;
         message_popup.textContent = '';
         return;
     }
 
-    let vehicleData = {
-        'PLACA': message.license_plate.toUpperCase(),
-        'TIPO': message.vehicle_type == 'car' ? 'CARRO' : 'MOTO',
-        'FECHA Y HORA DE ENTRADA': new Date(message.entry_date).toLocaleString('es-ES', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        }),
-    }
+    let vehicleData = vehicle;
 
-    let vehicleDataHTML = '';
+    // Limpiar el contenido anterior de la tabla
+    message_popup.innerHTML = '';
+
+    // Insertar las filas de datos en la tabla
     for (let key in vehicleData) {
-        vehicleDataHTML += `<p><strong>${key}:</strong> ${vehicleData[key]}</p>`;
+        let row = document.createElement('tr');
+        let cellKey = document.createElement('td');
+        let cellValue = document.createElement('td');
+        cellKey.textContent = key;
+        cellValue.textContent = vehicleData[key];
+        row.appendChild(cellKey);
+        row.appendChild(cellValue);
+        message_popup.appendChild(row);
     }
-    message_popup.innerHTML = vehicleDataHTML;
+    if (button_popup) {
+        button_popup.textContent = buttonTxt;
+    }
 }
 
 // Validar el formato de la placa

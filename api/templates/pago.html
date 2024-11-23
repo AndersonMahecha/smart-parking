@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartParking - Pago</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pago.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='assets/ico.png') }}" type="image/x-icon">
 </head>
 
@@ -60,7 +61,7 @@
                     <label for="placa">Ingrese la placa del vehículo <span
                             style="color: rgb(150, 0, 0);">*</span></label>
                     <input type="text" id="placa" name="placa" minlength="6" maxlength="6"
-                        style="text-transform:uppercase;">
+                        style="text-transform:uppercase;" required>
                     <div id="placa-preview" class="placa-preview">
                         <span id="placa-text">--- ---</span>
                     </div>
@@ -69,12 +70,22 @@
             </div>
         </section>
     </main>
-    <!-- Popup de información -->
     <div id="popup" class="popup">
         <div class="popup-content">
-            <h3>Información de pago</h3>
-            <div id="popup-message"></div>
             <span id="closeBtn" class="close">&times;</span>
+            <h2 id="title-message-popup"></h2>
+            <table id="message-popup">
+                <thead>
+                    <tr>
+                        <th>Campo</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Las filas de datos se insertarán aquí dinámicamente -->
+                </tbody>
+            </table>
+            <button id="button-popup"></button>
         </div>
     </div>
     <footer>

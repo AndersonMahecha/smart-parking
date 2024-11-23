@@ -3,6 +3,20 @@ import { insertMessagePopUp } from './main.js';
 const form = document.getElementById('vehiculo-form');
 const popup = document.getElementById('popup');
 
+function organizeVehicleData(message) {
+    return {
+        'PLACA': message.license_plate.toUpperCase(),
+        'TIPO': message.vehicle_type == 'car' ? 'CARRO' : 'MOTO',
+        'FECHA Y HORA DE ENTRADA': new Date(message.entry_date).toLocaleString('es-ES', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        }),
+    }
+}
 
 // Validar la placa al enviar el formulario
 form.addEventListener('submit', (event) => {
@@ -27,7 +41,7 @@ form.addEventListener('submit', (event) => {
             console.log("Respuesta del servidor:", data);
             popup.style.display = 'block';
             if (!data.message) {
-                insertMessagePopUp('VehÍculo registrado con exito', data);
+                insertMessagePopUp('Vehículo registrado con exito', organizeVehicleData(data));
             } else {
                 insertMessagePopUp('Error', data.message);
             }

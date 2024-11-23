@@ -10,6 +10,7 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Roboto', sans-serif;
+    font-size: 18px;
 }
 
 a {
@@ -47,7 +48,7 @@ input:read-only {
 button {
     cursor: pointer;
     padding: 7px 5px;
-    border: none;
+    border: 1px solid transparent;
     border-radius: 10px;
 }
 
@@ -178,16 +179,27 @@ main {
 .popup-content {
     display: flex;
     flex-direction: column;
-    width: 30%;
+    min-width: 30%;
+    max-width: 50%;
     gap: 30px;
     position: relative;
-    
+
     background-color: white;
-    
+
     margin: 15% auto;
     padding: 50px;
     border-radius: 10px;
     text-align: center;
+    align-items: center;
+}
+
+.popup-content button {
+    padding: 5px 20px;
+    transition: all 0.5s;
+}
+
+.popup-content button:hover {
+    transform: scale(1.1);
 }
 
 .popup-content p {
@@ -211,6 +223,37 @@ main {
     cursor: pointer;
 }
 
+/* Estilos para la tabla */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th,
+td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    text-wrap: nowrap;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+td:first-child {
+    font-weight: bold;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
 
 footer {
     background-color: var(--gray-footer);

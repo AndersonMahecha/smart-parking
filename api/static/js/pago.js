@@ -1,28 +1,38 @@
-// Selección de los elementos
+import { insertMessagePopUp } from './main.js';
 const form = document.getElementById('vehiculo-form');
 const popup = document.getElementById('popup');
-const popupMessage = document.getElementById('popup-message');
 
-// Función para obtener la hora actual
-function getCurrentTime() {
-    const now = new Date();
-    return now.toLocaleTimeString(); // Devuelve la hora en formato HH:MM:SS AM/PM
+function organizeVehicleData(vehicle) {
+    return {
+        'PLACA': vehicle.license_plate.toUpperCase(),
+        'TIPO': vehicle.vehicle_type == 'car' ? 'CARRO' : 'MOTO',
+        'TIEMPO DE ENTRADA': new Date(vehicle.entry_date).toLocaleString('es-ES', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        }),
+        'TIEMPO ACTUAL': new Date(vehicle.current_time).toLocaleString('es-ES', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        }),
+        'TIEMPO DE PARQUEO': convertMinutesToHours(vehicle.total_minutes),
+        'VALOR POR MINUTO': '$' + vehicle.cost_per_minute.toLocaleString('es-ES'),
+        'VALOR A PAGAR': '$' + Math.round(vehicle.total_cost).toLocaleString('es-ES'),
+    }
 }
 
-// Función que simula el "quemado" de datos
-function simulateData(licensePlate) {
-    // Datos simulados para la placa ingresada
-    const simulatedData = {
-        license_plate: licensePlate,
-        entry_date: "2024-11-21", // Fecha de ingreso simulada
-        entry_time: "10:30 AM",   // Hora de ingreso simulada
-        current_date: new Date().toLocaleDateString(), // Fecha actual
-        current_time: getCurrentTime(), // Hora actual
-        payment_per_minute: 70, // Valor por hora simulado
-        total_payment: 70 * 120   // Pago total simulado por 2 horas
-    };
-
-    return simulatedData;
+function convertMinutesToHours(minutes) {
+    const totalMinutes = Math.floor(minutes);
+    const hours = Math.floor(totalMinutes / 60);
+    const remainingMinutes = totalMinutes % 60;
+    return `${hours} horas - ${remainingMinutes} minutos`;
 }
 
 // Evento para manejar el envío del formulario
@@ -30,47 +40,32 @@ form.addEventListener('submit', (event) => {
     event.preventDefault(); // Prevenir el envío normal del formulario
 
     const placa = event.target.placa.value.toUpperCase(); // Obtener la placa en mayúsculas
-    const params = new URLSearchParams({ license_plate: placa }); // Crear los parámetros de URL
+    const params = { license_plate: placa }; // Crear los parámetros de URL
 
     // Hacer la solicitud POST usando fetch
-    fetch("http://localhost:5000/api/v1/paid", {
+    fetch("http://localhost:5000/api/v1/parking/pay/info", {
         method: "POST",
         headers: {
-            "Content-Type": "application/x-www-form-urlencoded", // Indicamos que enviamos URL-encoded
+            "Content-Type": "application/json", // Indicamos que enviamos JSON
         },
-        body: params.toString() // Convertir los parámetros a una cadena
+        body: JSON.stringify(params) // Convertir los parámetros a una cadena
     })
         .then(response => response.json())
         .then(data => {
             console.log("Respuesta del servidor:", data);
             popup.style.display = 'block';
-            // if (!data.message) {
-            //     insertMessagePopUp('Vehículo registrado con éxito', data);
-            // } else {
-            //     insertMessagePopUp('Error', data.message);
-            // }
+            if (!data.message) {
+                insertMessagePopUp('Información de pago', organizeVehicleData(data), 'Pagar');
+            } else {
+                insertMessagePopUp('Error', data.message);
+            }
             // reiniciar el formulario
             form.reset();
         })
         .catch(error => {
             console.error("Error:", error);
         });
-    // Simular la respuesta de datos
-    const data = simulateData(placa);
-
-    // Mostrar el popup con la información de pago
-    popup.style.display = 'block';
-    const message = `
-        <strong>Placa digitada:</strong> ${data.license_plate}<br>
-        <strong>Fecha de ingreso:</strong> ${data.entry_date}<br>
-        <strong>Hora de ingreso:</strong> ${data.entry_time}<br>
-        <strong>Fecha actual:</strong> ${data.current_date}<br>
-        <strong>Hora actual:</strong> ${data.current_time}<br>
-        <strong>Valor hora:</strong> $${data.payment_per_minute}<br>
-        <strong>Valor a pagar:</strong> $${data.total_payment}
-    `;
-    popupMessage.innerHTML = message;
-
     // Reiniciar el formulario después de mostrar la respuesta
+    form.disabled = true;
     form.reset();
 });

@@ -8,8 +8,6 @@ from api.repositories.card import CardRepository
 from api.repositories.parking_slot import ParkingSlotRepository
 from api.repositories.vehicle import VehicleRepository
 
-_cost_per_minute = 90
-
 
 class ParkingService:
     def __init__(
@@ -58,7 +56,8 @@ class ParkingService:
                 self.cards_repository.update_card(card_id, short_code)
             except DomainError as e:
                 if e.message == "Card already has a short code":
-                    raise DomainError("Card is already associated with a vehicle")
+                    raise DomainError(
+                        "Card is already associated with a vehicle")
             except Exception as e:
                 raise e
 
@@ -73,7 +72,7 @@ class ParkingService:
             card = self.cards_repository.get_by_id(card_id)
             if card is None:
                 raise DomainError("Card not found")
-            ## TODO get vehicle by card
+            # TODO get vehicle by card
 
         found_vehicle = self.vehicle_repository.get_vehicle_by_license_plate(
             license_plate
@@ -113,7 +112,8 @@ class ParkingService:
                 raise DomainError("Card not found")
             short_code = card.short_code
         if short_code is not None:
-            vehicle = self.vehicle_repository.get_vehicle_by_short_code(short_code)
+            vehicle = self.vehicle_repository.get_vehicle_by_short_code(
+                short_code)
 
         if license_plate is not None:
             vehicle = self.vehicle_repository.get_vehicle_by_license_plate(
@@ -123,16 +123,19 @@ class ParkingService:
         if vehicle is None:
             raise DomainError("Vehicle not found")
 
-        ## calculate total time
+        # calculate total time
         total_time = datetime.now() - vehicle.entry_date
         total_time_in_minutes = total_time.total_seconds() / 60
 
         if total_time_in_minutes < 0:
             total_time_in_minutes = 1
 
-        total_cost = total_time_in_minutes * _cost_per_minute
+        cost_per_minute = 90
+        if vehicle.vehicle_type == "motorcycle":
+            cost_per_minute = 50
 
-        return vehicle, datetime.now(), total_time_in_minutes, total_cost
+        total_cost = total_time_in_minutes * cost_per_minute
+        return vehicle, datetime.now(), total_time_in_minutes, cost_per_minute, total_cost
 
     def pay_parking(self, vehicle_id):
         vehicle = self.vehicle_repository.get_vehicle_by_id(vehicle_id)

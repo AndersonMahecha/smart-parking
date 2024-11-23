@@ -112,9 +112,6 @@ def authenticate_user():
     return jsonify(serialized_user), 200
 
 
-from websockets.asyncio.client import connect
-
-
 async def notify_clients(data):
     try:
         async with connect("ws://localhost:3500") as websocket:
@@ -198,7 +195,7 @@ def pay_parking():
     return jsonify(serialized_vehicle), 200
 
 
-@app.route("/api/v1/parking/pay", methods=["GET"])
+@app.route("/api/v1/parking/pay/info", methods=["POST"])
 def get_payment_info():
     card_id = get_optional_field("card_id")
     license_plate = get_optional_field("license_plate")
@@ -209,25 +206,25 @@ def get_payment_info():
             vehicle,
             current_time,
             total_minutes,
+            cost_per_minute,
             total_cost,
         ) = parkingService.get_total_cost(short_code, card_id, license_plate)
+        print(vehicle)
     except DomainError as e:
         return jsonify({"message": str(e)}), 400
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
     serialized_vehicle = VehicleSchema().dump(vehicle)
-    return (
-        jsonify(
-            {
-                "vehicle": serialized_vehicle,
-                "current_time": current_time,
-                "total_minutes": total_minutes,
-                "total_cost": total_cost,
-            }
-        ),
-        200,
-    )
+    # Crear la respuesta combinada
+    response = {
+        **serialized_vehicle,
+        "current_time": current_time.isoformat(),
+        "total_minutes": total_minutes,
+        "cost_per_minute": cost_per_minute,
+        "total_cost": total_cost
+    }
+    return (response, 200)
 
 
 @app.route("/api/v1/system/status", methods=["GET"])
@@ -241,7 +238,7 @@ def shutdown_session(exception=None):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    app.run(host="0.0.0.0", port=5000)
 
 
 def random_plate():
