@@ -66,6 +66,7 @@
                         <span id="placa-text">--- ---</span>
                     </div>
                     <button type="submit">Consultar Pago</button>
+                    <p id="message-error"></p>
                 </form>
             </div>
         </section>
@@ -74,6 +75,12 @@
         <div class="popup-content">
             <span id="closeBtn" class="close">&times;</span>
             <h2 id="title-message-popup"></h2>
+            <div id="checkmark" class="checkmark-wrapper" style="display: none;">
+                <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                    <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
+                    <path class="checkmark-check" fill="none" d="M16 26l9 9 15-15" />
+                </svg>
+            </div>
             <table id="message-popup">
                 <thead>
                     <tr>
@@ -86,6 +93,7 @@
                 </tbody>
             </table>
             <button id="button-popup"></button>
+            <p id="message-error"></p>
         </div>
     </div>
     <footer>

@@ -9,6 +9,8 @@ const title_message = document.getElementById('title-message-popup');
 const message_popup = document.getElementById('message-popup');
 const button_popup = document.getElementById('button-popup');
 
+const message_error = document.getElementById('message-error');
+
 document.addEventListener('DOMContentLoaded', (event) => {
     // obtener fecha y hora actuales
     let today = new Date();
@@ -51,6 +53,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     // Evento para validar la placa a medida que se escribe
     placaInput.addEventListener('input', (event) => {
+        message_error.style.display = 'none';
 
         // Eliminar caracteres no permitidos y agregar espacio
         let value = placaInput.value.replace(/[^A-Z0-9]/gi, '').toUpperCase();
@@ -81,7 +84,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
     }
 });
 
-export function insertMessagePopUp(title, vehicle, buttonTxt = 'Aceptar') {
+export function insertMessagePopUp(title, vehicle, buttonTxt = 'Default') {
     title_message.textContent = title;
 
     if (typeof vehicle === 'string') {
@@ -106,8 +109,12 @@ export function insertMessagePopUp(title, vehicle, buttonTxt = 'Aceptar') {
         row.appendChild(cellValue);
         message_popup.appendChild(row);
     }
-    if (button_popup) {
-        button_popup.textContent = buttonTxt;
+    if (buttonTxt != 'Default') {
+        if (button_popup) {
+            button_popup.textContent = buttonTxt;
+        }
+    } else {
+        button_popup.style.display = 'none';
     }
 }
 

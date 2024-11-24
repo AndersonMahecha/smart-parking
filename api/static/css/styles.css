@@ -255,6 +255,42 @@ tr:hover {
     background-color: #f1f1f1;
 }
 
+#message-error {
+    display: none;
+    color: red;
+    font-weight: bold;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+    text-align: center;
+    animation: vibrate 0.5s linear normal;
+    transition: display 1s ease;
+}
+
+@keyframes vibrate {
+    0% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-2px);
+    }
+
+    50% {
+        transform: translateX(2px);
+    }
+
+    75% {
+        transform: translateX(-2px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
 footer {
     background-color: var(--gray-footer);
     /* background-color: #ffcc016e; */

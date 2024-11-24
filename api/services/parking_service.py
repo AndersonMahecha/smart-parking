@@ -123,6 +123,9 @@ class ParkingService:
         if vehicle is None:
             raise DomainError("Vehicle not found")
 
+        if vehicle.payment_date is not None:
+            raise DomainError("Vehicle has already paid")
+
         # calculate total time
         total_time = datetime.now() - vehicle.entry_date
         total_time_in_minutes = total_time.total_seconds() / 60
