@@ -109,12 +109,12 @@ export function insertMessagePopUp(title, vehicle, buttonTxt = 'Default') {
         row.appendChild(cellValue);
         message_popup.appendChild(row);
     }
-    if (buttonTxt != 'Default') {
-        if (button_popup) {
+    if (button_popup) {
+        if (buttonTxt != 'Default') {
             button_popup.textContent = buttonTxt;
+        } else {
+            button_popup.style.display = 'none';
         }
-    } else {
-        button_popup.style.display = 'none';
     }
 }
 

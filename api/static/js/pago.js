@@ -28,6 +28,7 @@ function organizeVehicleData(vehicle) {
         'TIEMPO DE PARQUEO': convertMinutesToHours(vehicle.total_minutes),
         'VALOR POR MINUTO': '$' + vehicle.cost_per_minute.toLocaleString('es-ES'),
         'VALOR A PAGAR': '$' + Math.round(vehicle.total_cost).toLocaleString('es-ES'),
+        'UBICACIÓN': vehicle.parking_slot_id,
     }
 }
 function organizeVehiclePay(vehicle) {

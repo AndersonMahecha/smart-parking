@@ -2,15 +2,38 @@ import { insertMessagePopUp } from './main.js';
 
 const form = document.getElementById('vehiculo-form');
 const popup = document.getElementById('popup');
+const message_error = document.getElementById('message-error');
 
+
+function organizeVehicleData(message) {
+    return {
+        'PLACA': message.license_plate.toUpperCase(),
+        'TIPO': message.vehicle_type == 'car' ? 'CARRO' : 'MOTO',
+        'FECHA Y HORA DE ENTRADA': new Date(message.entry_date).toLocaleString('es-ES', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        }),
+        'FECHA Y HORA DE PAGO': new Date(message.payment_date).toLocaleString('es-ES', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        }),
+    }
+}
 
 // Validar la placa al enviar el formulario
 form.addEventListener('submit', (event) => {
     event.preventDefault(); // Evita el envío del formulario
 
     const vehicleData = {
-        license_plate: event.target.placa.value.toUpperCase(),
-        vehicle_type: "unknown",
+        license_plate: event.target.placa.value.toUpperCase()
     };
 
     // Hacer la solicitud POST usando fetch
@@ -24,11 +47,12 @@ form.addEventListener('submit', (event) => {
         .then(response => response.json())
         .then(data => {
             console.log("Respuesta del servidor:", data);
-            popup.style.display = 'block';
             if (!data.message) {
-                insertMessagePopUp('VehÍculo registrado con exito', data);
+                popup.style.display = 'block';
+                insertMessagePopUp('Salida registrada con exito', organizeVehicleData(data));
             } else {
-                insertMessagePopUp('Error', data.message);
+                message_error.style.display = 'block';
+                message_error.textContent = data.message;
             }
             // reiniciar el formulario
             form.reset();

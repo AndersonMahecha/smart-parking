@@ -90,6 +90,9 @@ class ParkingService:
             except Exception as e:
                 raise e
 
+        if found_vehicle.has_exited:
+            raise DomainError("Vehicle has already left the parking")
+
         found_vehicle.has_exited = True
 
         self.vehicle_repository.update_vehicle(found_vehicle)
@@ -137,7 +140,7 @@ class ParkingService:
         if vehicle.vehicle_type == "motorcycle":
             cost_per_minute = 50
 
-        total_cost = total_time_in_minutes * cost_per_minute
+        total_cost = max(total_time_in_minutes * cost_per_minute, 50)
         return vehicle, datetime.now(), total_time_in_minutes, cost_per_minute, total_cost
 
     def pay_parking(self, vehicle_id):

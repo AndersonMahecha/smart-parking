@@ -2,6 +2,7 @@ import { insertMessagePopUp } from './main.js';
 
 const form = document.getElementById('vehiculo-form');
 const popup = document.getElementById('popup');
+const message_error = document.getElementById('message-error');
 
 function organizeVehicleData(message) {
     return {
@@ -39,11 +40,12 @@ form.addEventListener('submit', (event) => {
         .then(response => response.json())
         .then(data => {
             console.log("Respuesta del servidor:", data);
-            popup.style.display = 'block';
             if (!data.message) {
+                popup.style.display = 'block';
                 insertMessagePopUp('Vehículo registrado con exito', organizeVehicleData(data));
             } else {
-                insertMessagePopUp('Error', data.message);
+                message_error.style.display = 'block';
+                message_error.textContent = data.message;
             }
             // reiniciar el formulario
             form.reset();
