@@ -293,7 +293,6 @@ tr:hover {
 
 footer {
     background-color: var(--gray-footer);
-    /* background-color: #ffcc016e; */
     padding: 20px;
     display: flex;
     justify-content: space-between;
@@ -308,4 +307,21 @@ footer {
     /* background-color: black; */
     content: url('../assets/github-favicon-dark.png');
     /* Replace with the path to your hover image */
+}
+
+/* Cambiar el ancho/alto del scroll */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Estilo del fondo del scrollbar */
+::-webkit-scrollbar-track {
+    background: #ffffff;
+    border-radius: 10px;
+}
+
+/* Estilo de la barra deslizante */
+::-webkit-scrollbar-thumb {
+    background: var(--brand-color);
+    border-radius: 20px;
 }

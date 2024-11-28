@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartParking</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='assets/ico.png') }}" type="image/x-icon">
 </head>
 
@@ -26,11 +27,11 @@
     </header>
     <main>
         <section id="left-menu"> <!-- Menú -->
-            <a href="{{ url_for('index') }}" id="item-left-menu" class="box">
+            <a href="{{ url_for('index') }}" id="item-left-menu" class="box actual-option">
                 <img src="{{ url_for('static', filename='assets/menu/dashboard.png') }}" alt="">
                 <p>Dashboard</p>
             </a>
-            <a href="{{ url_for('ingreso') }}" id="item-left-menu" class="box actual-option">
+            <a href="{{ url_for('ingreso') }}" id="item-left-menu" class="box">
                 <img src="{{ url_for('static', filename='assets/menu/ingreso.png') }}" alt="">
                 <p>Ingreso de vehiculos</p>
             </a>
@@ -48,7 +49,38 @@
             </a>
         </section> <!-- Menú -->
         <section class="box" id="section-content"> <!-- Contenido -->
-            <h1>Dashboard</h1>
+            <div class="dashboard-content">
+                <div class="card" id="slots-card">
+                    <h2>Total</h2>
+                    <p id="slots-count">0</p>
+                </div>
+                <div class="card" id="vehicles-card">
+                    <h2>Ocupados</h2>
+                    <p id="vehicles-count">0</p>
+                </div>
+                <div class="card" id="slots-available-card">
+                    <h2>Disponibles</h2>
+                    <p id="slots-available-count">0</p>
+                </div>
+            </div>
+            <p id="message-error"></p>
+            <div class="parking-map">
+                <section class="parking-map-row" id="parking-map-up">
+                    <div class="slot" id="slot-1" data-status="occupied">1</div>
+                    <div class="slot" id="slot-2" data-status="available">2</div>
+                    <div class="slot" id="slot-3" data-status="available">3</div>
+                    <div class="slot" id="slot-4" data-status="occupied">4</div>
+                    <div class="slot" id="slot-5" data-status="available">5</div>
+                </section>
+                <section class="parking-map-row" id="parking-map-road"></section>
+                <section class="parking-map-row" id="parking-map-down">
+                    <div class="slot" id="slot-6" data-status="available">6</div>
+                    <div class="slot" id="slot-7" data-status="available">7</div>
+                    <div class="slot" id="slot-8" data-status="available">8</div>
+                    <div class="slot" id="slot-9" data-status="available">9</div>
+                    <div class="slot" id="slot-10" data-status="available">10</div>
+                </section>
+            </div>
         </section> <!-- Contenido -->
     </main>
     <footer>
@@ -72,6 +104,6 @@
     </footer>
 </body>
 
-<script src="{{ url_for('static', filename='js/ingreso.js') }}"></script>
+<script src="{{ url_for('static', filename='js/index.js') }}"></script>
 
 </html>
