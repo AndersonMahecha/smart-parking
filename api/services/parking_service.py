@@ -43,39 +43,57 @@ class ParkingService:
         vehicle.parking_slot_id = random.choice(available_slots).identifier
 
         if found_vehicle is not None:
-            raise DomainError("Vehicle already registered")
+            if found_vehicle.has_exited:
+                transient_vehicle = VehicleModel(
+                    identifier=found_vehicle.identifier,
+                    license_plate=found_vehicle.license_plate,
+                    short_code=found_vehicle.short_code,
+                    vehicle_type=found_vehicle.vehicle_type,
+                    entry_date=datetime.now(),
+                    parking_slot_id=vehicle.parking_slot_id,
+                    payment_date=None,
+                    has_exited=False,
+                )
+                updateVehicle = self.vehicle_repository.update_vehicle(
+                    transient_vehicle)
+                self.parking_slots_repository.update_parking_slot(
+                    transient_vehicle.parking_slot_id, transient_vehicle.identifier)
 
-        while True:
-            short_code = generate_short_code()
-            found_vehicle = self.vehicle_repository.get_vehicle_by_short_code(
-                short_code
+                return updateVehicle
+            else:
+                raise DomainError("Vehicle already registered")
+        else:
+            while True:
+                short_code = generate_short_code()
+                found_vehicle = self.vehicle_repository.get_vehicle_by_short_code(
+                    short_code
+                )
+                if found_vehicle is None:
+                    break
+
+            transient_vehicle = VehicleModel(
+                license_plate=vehicle.license_plate,
+                short_code=short_code,
+                vehicle_type=vehicle.vehicle_type,
+                entry_date=vehicle.entry_date,
+                parking_slot_id=vehicle.parking_slot_id,
             )
-            if found_vehicle is None:
-                break
 
-        transient_vehicle = VehicleModel(
-            license_plate=vehicle.license_plate,
-            short_code=short_code,
-            vehicle_type=vehicle.vehicle_type,
-            entry_date=vehicle.entry_date,
-            parking_slot_id=vehicle.parking_slot_id,
-        )
+            if card is not None:
+                try:
+                    self.cards_repository.update_card(card_id, short_code)
+                except DomainError as e:
+                    if e.message == "Card already has a short code":
+                        raise DomainError(
+                            "Card is already associated with a vehicle")
+                except Exception as e:
+                    raise e
 
-        if card is not None:
-            try:
-                self.cards_repository.update_card(card_id, short_code)
-            except DomainError as e:
-                if e.message == "Card already has a short code":
-                    raise DomainError(
-                        "Card is already associated with a vehicle")
-            except Exception as e:
-                raise e
+            vehicle = self.vehicle_repository.create_vehicle(transient_vehicle)
+            self.parking_slots_repository.update_parking_slot(
+                vehicle.parking_slot_id, vehicle.identifier)
 
-        vehicle = self.vehicle_repository.create_vehicle(transient_vehicle)
-        self.parking_slots_repository.update_parking_slot(
-            vehicle.parking_slot_id, vehicle.identifier)
-
-        return vehicle
+            return vehicle
 
     def register_vehicle_exit(self, license_plate, card_id: str) -> VehicleModel:
 
