@@ -5,7 +5,7 @@ from sqlalchemy import Column, String, ForeignKey
 from api.repositories.mysql import Base
 
 
-class ParkingSlotRepositoryModel(Base):
+class ParkingSlotEntity(Base):
     __tablename__ = "parking_slots"
 
     identifier = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

@@ -98,14 +98,12 @@ class ParkingService:
         self.vehicle_repository.update_vehicle(found_vehicle)
         return found_vehicle
 
-    def slots_count(self):
-        parking_slots = self.parking_slots_repository.get_all_parking_slots()
-        return len(parking_slots)
-
-    def vehicles_count(self):
+    def parking_status(self):
         vehicles = self.vehicle_repository.get_all_vehicles()
+        count = len([vehicle for vehicle in vehicles if vehicle.has_exited is False])
 
-        return len([vehicle for vehicle in vehicles if vehicle.has_exited is False])
+        parking_slots = self.parking_slots_repository.get_all_parking_slots()
+        return parking_slots, count
 
     def get_total_cost(self, short_code, card_id, license_plate):
         vehicle = None

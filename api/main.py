@@ -13,6 +13,7 @@ from marshmallow import ValidationError
 from api.model.exceptions import DomainError
 from api.model.user import RequestUserSchema
 from api.model.vehicle import VehicleSchema
+from api.model.parking_slot import ParkingSlotSchema
 from api.repositories.card import CardRepository
 from api.repositories.mysql import db_session, init_db
 from api.repositories.parking_slot import ParkingSlotRepository
@@ -173,9 +174,19 @@ def register_exit():
 
 @app.route("/api/v1/parking/status", methods=["GET"])
 def get_parking_status():
-    slots_count = parkingService.slots_count()
-    vehicles_count = parkingService.vehicles_count()
-    return jsonify({"slots_count": slots_count, "vehicles_count": vehicles_count}), 200
+    parking_slots, vehicles_count = parkingService.parking_status()
+
+    slots = ParkingSlotSchema().dump(parking_slots, many=True)
+    return (
+        jsonify(
+            {
+                "slots_count": len(parking_slots),
+                "vehicles_count": vehicles_count,
+                "slots": slots,
+            }
+        ),
+        200,
+    )
 
 
 @app.route("/api/v1/parking/pay", methods=["POST"])

@@ -79,7 +79,7 @@
 
         // Inicializar comunicación por WebSockets
         function initializeWebSocket() {
-            socket = new WebSocket('ws://192.168.137.9:3500'); // Cambia el puerto según tu configuración
+            socket = new WebSocket('ws://192.168.10.50:3500'); // Cambia el puerto según tu configuración
 
             socket.onopen = () => {
                 console.log("WebSocket conectado");

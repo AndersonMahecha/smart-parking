@@ -17,7 +17,7 @@
 #define DEVICE_TYPE_BARRIER 0
 #define DEVICE_TYPE_SENSOR 1
 
-#define SENSE_UMBRAL 2000
+#define SENSE_UMBRAL 1900
 #define SENSE_COUNT 4
 
 #define ssid "parqueadero"
@@ -29,8 +29,20 @@ uint8_t SENSOR_PINS[SENSE_COUNT] = {
     36,
     39,
     34,
-    35
-    };
+    35};
+
+uint8_t SLOT_STATUS_PIN[SENSE_COUNT] = {
+    26,
+    25,
+    33,
+    32};
+
+int SENSOR_ADJUSTMENT[SENSE_COUNT] = {
+    -200,
+    0,
+    0,
+    -50};
+
 
 bool SENSOR_STATES[SENSE_COUNT] = {false};
 unsigned long lastChangeTime[SENSE_COUNT] = {0};
@@ -51,10 +63,15 @@ void setup()
 
   WiFiMulti.addAP(ssid, password);
 
-  pinMode(36, INPUT);
-  pinMode(39, INPUT);
-  pinMode(34, INPUT);
-  pinMode(35, INPUT);
+  for (int i = 0; i < SENSE_COUNT; i++)
+  {
+    pinMode(SENSOR_PINS[i], INPUT);
+  }
+
+  for (int i = 0; i < SENSE_COUNT; i++)
+  {
+    pinMode(SLOT_STATUS_PIN[i], OUTPUT);
+  }
 
   while (WiFiMulti.run() != WL_CONNECTED)
   {
@@ -64,7 +81,7 @@ void setup()
   String ip = WiFi.localIP().toString();
   Serial.printf("[SETUP] WiFi Connected %s\n", ip.c_str());
 
-  webSocket.begin("192.168.137.9", 3500, "");
+  webSocket.begin("192.168.10.50", 3500, "");
 
   // event handler
   webSocket.onEvent(webSocketEvent);
@@ -82,7 +99,7 @@ void loop()
   for (int i = 0; i < SENSE_COUNT; i++)
   {
 
-    bool currentState = analogRead(SENSOR_PINS[i]) > SENSE_UMBRAL;
+    bool currentState = analogRead(SENSOR_PINS[i]) > SENSE_UMBRAL + SENSOR_ADJUSTMENT[i];
 
     if (currentState != SENSOR_STATES[i] && millis() - lastChangeTime[i] > debounceTime)
     {
@@ -94,6 +111,10 @@ void loop()
 
   if (changeDetected)
   {
+    for (int i = 0; i < SENSE_COUNT; i++)
+    {
+      digitalWrite(SLOT_STATUS_PIN[i], SENSOR_STATES[i]);
+    }
     buildMessage();
   }
 }
