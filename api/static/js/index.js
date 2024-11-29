@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
                 animateCounter('slots-count', 0, data.slots_count, 1100);
                 animateCounter('vehicles-count', 0, data.vehicles_count, 1100);
                 animateCounter('slots-available-count', 0, data.slots_count - data.vehicles_count, 1100);
+                updateStatus(data.slots);
             } else {
                 message_error.style.display = 'block';
                 message_error.textContent = data.message;
@@ -50,4 +51,15 @@ function animateCounter(id, start, end, duration) {
         }
     }
     requestAnimationFrame(updateCounter);
+}
+
+function updateStatus(slots) {
+    for (let i = 0; i < slots.length; i++) {
+        const slot = slots[i];
+        const slotElement = document.getElementById(`slot-${i + 1}`);
+        if (slotElement) {
+            slotElement.textContent = slot.slot_number;
+            slotElement.setAttribute('data-status', slot.status);
+        }
+    }
 }

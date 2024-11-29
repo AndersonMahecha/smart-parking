@@ -33,6 +33,15 @@ class ParkingService:
             vehicle.license_plate
         )
 
+        slots = self.parking_slots_repository.get_all_parking_slots()
+        available_slots = [
+            slot for slot in slots if slot.status == "available"]
+        if len(available_slots) == 0:
+            raise DomainError("No available parking slots")
+
+        # asignar uno random a vehicle
+        vehicle.parking_slot_id = random.choice(available_slots).identifier
+
         if found_vehicle is not None:
             raise DomainError("Vehicle already registered")
 
@@ -49,6 +58,7 @@ class ParkingService:
             short_code=short_code,
             vehicle_type=vehicle.vehicle_type,
             entry_date=vehicle.entry_date,
+            parking_slot_id=vehicle.parking_slot_id,
         )
 
         if card is not None:
@@ -62,6 +72,8 @@ class ParkingService:
                 raise e
 
         vehicle = self.vehicle_repository.create_vehicle(transient_vehicle)
+        self.parking_slots_repository.update_parking_slot(
+            vehicle.parking_slot_id, vehicle.identifier)
 
         return vehicle
 
@@ -96,11 +108,14 @@ class ParkingService:
         found_vehicle.has_exited = True
 
         self.vehicle_repository.update_vehicle(found_vehicle)
+        self.parking_slots_repository.update_parking_slot(
+            found_vehicle.parking_slot_id)
         return found_vehicle
 
     def parking_status(self):
         vehicles = self.vehicle_repository.get_all_vehicles()
-        count = len([vehicle for vehicle in vehicles if vehicle.has_exited is False])
+        count = len(
+            [vehicle for vehicle in vehicles if vehicle.has_exited is False])
 
         parking_slots = self.parking_slots_repository.get_all_parking_slots()
         return parking_slots, count
@@ -126,6 +141,9 @@ class ParkingService:
 
         if vehicle.payment_date is not None:
             raise DomainError("Vehicle has already paid")
+
+        vehicle.parking_slot_id = self.parking_slots_repository.get_parking_slot(
+            vehicle.parking_slot_id).slot_number
 
         # calculate total time
         total_time = datetime.now() - vehicle.entry_date
